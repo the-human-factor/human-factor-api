@@ -56,7 +56,7 @@ jobs:
           name: Deploy to dev namespace
           command: |
             kubectl config set-context --current --namespace=development
-            kubectl set image deployment human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCL_SHA1} --record
+            kubectl set image deployment human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
 
 workflows:
   version: 2
