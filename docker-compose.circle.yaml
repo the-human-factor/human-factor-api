@@ -18,6 +18,7 @@ services:
     environment:
       FLASK_ENV: development
       POSTGRES_USER: postgres
+      PYTHONDONTWRITEBYTECODE: 1
     ports:
       - "9000:9000"
     depends_on:

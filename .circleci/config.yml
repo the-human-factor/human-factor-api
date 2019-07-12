@@ -32,13 +32,13 @@ jobs:
       - run:
           name: Auth with GCP
           command: |
-            docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} .
             echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
             gcloud config set project $GOOGLE_PROJECT_ID
             gcloud config set compute/zone $GOOGLE_COMPUTE_ZONE
       - run:
           name: Build and push Docker image
           command: |
+            docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} .
             echo $GCLOUD_SERVICE_KEY | docker login -u _json_key --password-stdin https://gcr.io
             docker push gcr.io/the-human-factor/human-api:${CIRCLE_SHA1}
   deploy-dev:
