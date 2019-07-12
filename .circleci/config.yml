@@ -21,9 +21,9 @@ jobs:
 
       - run:
           name: Start container and verify it is working
-          working_directory: ~/repo/api
           command: |
             set -x
+
             docker-compose -f docker-compose.circle.yaml up -d
             docker-compose exec api pipenv run flask db upgrade
             docker-compose exec api pipenv run pytest
