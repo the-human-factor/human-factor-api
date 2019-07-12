@@ -1,0 +1,32 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+flask-shell-ipython = "*"
+pytest = "==4.6.3"
+pytest-flask = "*"
+pytest-flask-sqlalchemy = "*"
+pytest-factoryboy = "*"
+ipdb = "*"
+pytest-watch = "*"
+
+[packages]
+flask-sqlalchemy = "*"
+flask = "*"
+flask-migrate = "*"
+pytest-flask-sqlalchemy = "*"
+flask-restful = "*"
+marshmallow-sqlalchemy = "*"
+marshmallow = "*"
+flask-marshmallow = "*"
+factory-boy = "*"
+google-cloud-storage = "*"
+gunicorn = "*"
+dynaconf = "*"
+flask-cors = "*"
+psycopg2-binary = "*"
+
+[requires]
+python_version = "3.5"
