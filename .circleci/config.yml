@@ -50,6 +50,8 @@ jobs:
             echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
             gcloud config set project $GOOGLE_PROJECT_ID
             gcloud config set compute/zone $GOOGLE_COMPUTE_ZONE
+            gcloud container clusters get-credentials main-1
+
       - run:
           name: Deploy to dev namespace
           command: |
