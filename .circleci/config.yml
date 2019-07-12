@@ -1,13 +1,16 @@
 version: 2.1
 
-orbs:
-  gcp-gke: circleci/gcp-gke@0.2.0
+executors:
+  gcp:
+    docker:
+      - image: google/cloud-sdk
+
+
 
 jobs:
   build:
     working_directory: ~/repo
-    docker:
-      - image: google/cloud-sdk
+    executor: gcp
     steps:
       - checkout
       - run:
@@ -27,11 +30,40 @@ jobs:
             docker-compose exec api pipenv run flask db upgrade
             docker-compose exec api pipenv run pytest
       - run:
-          name: Build and push Docker image
+          name: Auth with GCP
           command: |
             docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} .
             echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
             gcloud config set project $GOOGLE_PROJECT_ID
             gcloud config set compute/zone $GOOGLE_COMPUTE_ZONE
+      - run:
+          name: Build and push Docker image
+          command: |
             echo $GCLOUD_SERVICE_KEY | docker login -u _json_key --password-stdin https://gcr.io
             docker push gcr.io/the-human-factor/human-api:${CIRCLE_SHA1}
+  deploy-dev:
+    executor: gcp
+    steps:
+      - run:
+          name: Auth with GCP
+          command: |
+            docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} .
+            echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+            gcloud config set project $GOOGLE_PROJECT_ID
+            gcloud config set compute/zone $GOOGLE_COMPUTE_ZONE
+      - run:
+          name: Deploy to dev namespace
+          command: |
+            kubectl config set-context --curent --namespace=development
+            kubectl set image deployment human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCL_SHA1} --record
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build
+      - deploy-dev:
+          filters:
+            branches:
+              only:
+                - master

@@ -56,4 +56,4 @@ RUN pip install pipenv && pipenv install
 
 COPY . /app
 
-CMD ["pipenv", "run", "gunicorn", "-w", "4", "-b", "${HOST}:${PORT}", "api.wsgi:app"]
+CMD ["pipenv", "run", "gunicorn", "-w", "4", "-b", "${HOST}:${PORT}", "api.app:create_app()"]
