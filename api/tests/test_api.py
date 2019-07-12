@@ -1,8 +1,4 @@
-from flask import jsonify
+import api
 
-def test_app(app, client):
-  res = client.get('/')
-  print("Res", res.data)
-
-  assert res.data == b'Hello, Brian!'
-  assert res.status_code == 200
+def test_app(client):
+  assert client.get('/').status_code == 200
