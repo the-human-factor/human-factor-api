@@ -9,5 +9,3 @@ spec:
   ports:
     - port: 9000
       protocol: TCP
-  type: LoadBalancer
-  loadBalancerIP: "35.239.14.192" # human-api-service-dev-ip accessible via VPC network in GCP
