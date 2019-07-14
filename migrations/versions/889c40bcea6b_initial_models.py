@@ -1,8 +1,8 @@
-"""empty message
+"""Initial models
 
-Revision ID: ae32602be2ae
+Revision ID: 889c40bcea6b
 Revises: 
-Create Date: 2019-07-02 23:20:48.175119
+Create Date: 2019-07-14 23:14:27.288291
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'ae32602be2ae'
+revision = '889c40bcea6b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -39,11 +39,11 @@ def upgrade():
     sa.Column('title', sa.Unicode(length=255), nullable=False),
     sa.Column('instructions', sa.UnicodeText(), nullable=False),
     sa.Column('grading_notes', sa.UnicodeText(), nullable=False),
-    sa.Column('creator_id', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('user_id', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('video_id', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['creator_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['video_id'], ['videos.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
