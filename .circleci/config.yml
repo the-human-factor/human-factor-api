@@ -36,22 +36,16 @@ jobs:
             gcloud config set project $GOOGLE_PROJECT_ID
             gcloud config set compute/zone $GOOGLE_COMPUTE_ZONE
       - run:
-          name: Build and push Docker image
+          name: Build tag and push Docker image
           command: |
             docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} .
+            if [ $(git rev-parse --abbrev-ref HEAD)==master ]; then docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:latest; fi
             echo $GCLOUD_SERVICE_KEY | docker login -u _json_key --password-stdin https://gcr.io
             docker push gcr.io/the-human-factor/human-api:${CIRCLE_SHA1}
+
   deploy-dev:
     executor: gcp
     steps:
-      - setup_remote_docker:
-         docker_layer_caching: true
-
-      - run:
-          name: Tag image as latest
-          command: |
-            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:latest
-
       - run:
           name: Auth with GCP
           command: |
