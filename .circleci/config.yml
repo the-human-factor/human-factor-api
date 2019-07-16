@@ -44,6 +44,14 @@ jobs:
   deploy-dev:
     executor: gcp
     steps:
+      - setup_remote_docker:
+         docker_layer_caching: true
+
+      - run:
+          name: Tag image as latest
+          command: |
+            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:latest
+
       - run:
           name: Auth with GCP
           command: |
@@ -55,7 +63,6 @@ jobs:
       - run:
           name: Deploy to dev namespace
           command: |
-            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:latest
             kubectl config set-context --current --namespace=development
             kubectl set image deployment human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
 
