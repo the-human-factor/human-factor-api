@@ -25,7 +25,7 @@ def create_app():
 
   app.logger.info('App configured to talk to DB: %s', app.config['SQLALCHEMY_DATABASE_URI'])
 
-  cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+  cors = CORS(app, resources={r"/api/*": {"origins": app.config['ALLOWED_ORIGINS']}})
   models.db.init_app(app) # This needs to come before Marshmallow
   migrate = Migrate(app, models.db)
   ma = Marshmallow(app)

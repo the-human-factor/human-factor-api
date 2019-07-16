@@ -11,6 +11,7 @@ class VideoSchema(ModelSchema):
 class UserSchema(ModelSchema):
   class Meta:
     model = models.User
+    exclude = ('challenges',)
 
 class ChallengeSchema(ModelSchema):
   class Meta:
@@ -23,13 +24,10 @@ class ResponseSchema(ModelSchema):
   class Meta:
     model = models.Response
 
-  class ChallengeWithoutResponses(ModelSchema):
+  class ChallengeWithoutResponses(ChallengeSchema):
     class Meta:
       model = models.Challenge
-      exclude = ('responses',)
-
-    video = fields.Nested(VideoSchema)
-    user = fields.Nested(UserSchema)
+      exclude = ('responses',) # Prevent circular serialization
 
   challenge = fields.Nested(ChallengeWithoutResponses)
   video = fields.Nested(VideoSchema)
