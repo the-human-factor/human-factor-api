@@ -35,6 +35,10 @@ def create_app():
   def hello():
     return 'Hello, Brian!'
 
+  @app.route('/healthcheck')
+  def healthcheck():
+    return 'ok'
+
   @app.shell_context_processor
   def make_shell_context():
     """
