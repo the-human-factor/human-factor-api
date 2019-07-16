@@ -9,12 +9,14 @@ VIDEO_BUCKET="dev.videos.thehumanfactor.ai"
 
 [development]
 DB_HOST="db"
+ALLOWED_ORIGINS="http://localhost:3000"
 
 [testing]
 
 [staging]
 DB_HOST="human-api-db-postgresql.staging.svc.cluster.local"
 VIDEO_BUCKET="staging.videos.thehumanfactor.ai"
+ALLOWED_ORIGINS="*"
 
 [production]
 VIDEO_BUCKET="prod.videos.thehumanfactor.ai"
