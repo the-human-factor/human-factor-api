@@ -2,16 +2,23 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: development-ingress
+  namespace: development
   annotations:
     kubernetes.io/ingress.class: nginx
-    kubernetes.io/ingress.global-static-ip-name: "dev-ingress-ip"
     nginx.ingress.kubernetes.io/proxy-body-size: 100m
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    certmanager.k8s.io/acme-challenge-type: http01
 spec:
+  tls:
+    - hosts:
+        - dev.api.thehumanfactor.ai
+      secretName: human-api-cert-dev
   rules:
-  - http:
+  - host: dev.api.thehumanfactor.ai
+    http:
       paths:
-      - path: /api
-        backend:
-          serviceName: human-api-service
-          servicePort: 9000
+        - path: /api
+          backend:
+            serviceName: human-api-service
+            servicePort: 9000
