@@ -42,6 +42,7 @@ jobs:
             if [ $(git rev-parse --abbrev-ref HEAD)==master ]; then docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:latest; fi
             echo $GCLOUD_SERVICE_KEY | docker login -u _json_key --password-stdin https://gcr.io
             docker push gcr.io/the-human-factor/human-api:${CIRCLE_SHA1}
+            if [ $(git rev-parse --abbrev-ref HEAD)==master ]; then docker push gcr.io/the-human-factor/human-api:latest; fi
 
   deploy-dev:
     executor: gcp
