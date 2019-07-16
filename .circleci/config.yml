@@ -55,7 +55,7 @@ jobs:
       - run:
           name: Deploy to dev namespace
           command: |
-            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:latest .
+            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:latest
             kubectl config set-context --current --namespace=development
             kubectl set image deployment human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
 
