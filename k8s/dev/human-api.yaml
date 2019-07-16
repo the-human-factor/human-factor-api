@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: human-api
-          image: gcr.io/the-human-factor/human-api:latest
+          image: gcr.io/the-human-factor/human-api:master
           ports:
             - containerPort: 9000
           volumeMounts:

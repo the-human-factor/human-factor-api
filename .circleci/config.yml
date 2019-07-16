@@ -38,10 +38,10 @@ jobs:
             echo $GCLOUD_SERVICE_KEY | docker login -u _json_key --password-stdin https://gcr.io
 
       - run:
-          name: Build tag and push Docker image
+          name: Build, tag and push Docker image
           command: |
             docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} .
-            if [ $(git rev-parse --abbrev-ref HEAD)==master ]; then docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:latest; fi
+            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:$(git rev-parse --abbrev-ref HEAD)
             docker push gcr.io/the-human-factor/human-api
 
   deploy-dev:
