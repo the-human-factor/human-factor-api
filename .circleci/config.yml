@@ -38,7 +38,7 @@ jobs:
       - run:
           name: Build and push Docker image
           command: |
-            docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} -t gcr.io/the-human-factor/human-api:latest .
+            docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} .
             echo $GCLOUD_SERVICE_KEY | docker login -u _json_key --password-stdin https://gcr.io
             docker push gcr.io/the-human-factor/human-api:${CIRCLE_SHA1}
   deploy-dev:
@@ -55,6 +55,7 @@ jobs:
       - run:
           name: Deploy to dev namespace
           command: |
+            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:latest .
             kubectl config set-context --current --namespace=development
             kubectl set image deployment human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
 
