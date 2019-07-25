@@ -56,37 +56,10 @@ docker-compose logs -f <service-name>
 
 Where service name can be either `api` or `db`
 
-### Make targets
+### Make targets - `make help`
 
-For convenience we have several make targets as shorthands for docker-compose commands. These are below
+For convenience we have several make targets as shorthands for docker-compose commands.
 
-#### `make shell`
-
-Creates a bash shell inside the `api` container
-
-#### `make console`
-
-Creates an ipython console with the app, db,  models, factories, and schema instances loaded in the session.
-
-#### `make psql`
-
-Creates a postgres shell in the `db` container
-
-#### `make test`
-
-Runs the tests
-
-#### `make migrate`
-
-Migrates to the latest version of the schema
-
-#### `make db-reset`
-
-Blows up and rebuilds the db image, deleting all the local data
-
-#### `make reset`
-
-Blows up and rebuilds both the api and db image, deleting all local data
 
 ### Installing deps
 
@@ -97,6 +70,7 @@ We use [pipenv](https://github.com/pypa/pipenv) to manage our python dependencie
 ```
 
 ### Recreate the db and blow away old versions
+
 rm migrations/versions/*
 make db-reset
 
