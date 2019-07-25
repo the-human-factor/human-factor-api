@@ -1,21 +1,26 @@
 import os
 import json
 
+from dynaconf import FlaskDynaconf
+from sqlalchemy.exc import DatabaseError
 from flask import Flask, request
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
-from dynaconf import FlaskDynaconf
-from sqlalchemy.exc import DatabaseError
-
 import api.models as models
+from api.models import bcrypt
 import api.routes as routes
+import api.resources as resources
+
 
 def create_app():
   app = Flask(__name__)
   FlaskDynaconf(app) # Initialize config
+
+  app.config['JWT_BLACKLIST_ENABLED'] = True
+  app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['refresh']
 
   app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
     app.config['DB_USER'],
@@ -30,10 +35,8 @@ def create_app():
   migrate = Migrate(app, models.db)
   ma = Marshmallow(app)
   routes.api.init_app(app)
-
-  @app.route('/')
-  def hello():
-    return 'Hello, Brian!'
+  resources.jwt.init_app(app)
+  bcrypt.init_app(app)
 
   @app.route('/healthcheck')
   def healthcheck():
