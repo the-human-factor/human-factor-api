@@ -9,7 +9,7 @@ import sqlalchemy
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import backref
 from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from sqlalchemy.dialects.postgresql import UUID
 
 
 bcrypt = Bcrypt()
