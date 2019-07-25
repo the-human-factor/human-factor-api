@@ -27,6 +27,9 @@ gunicorn = "*"
 dynaconf = "*"
 flask-cors = "*"
 psycopg2-binary = "*"
+bcrypt = "*"
+flask-jwt-extended = "*"
+flask-bcrypt = "*"
 
 [requires]
 python_version = "3.5"

@@ -35,6 +35,11 @@ spec:
                 secretKeyRef:
                   name: human-api-db-postgresql
                   key: postgresql-password
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: human-api-jwt-secret
+                  key: secret
 
       volumes:
         - name: credentials
