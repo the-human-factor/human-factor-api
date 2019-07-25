@@ -8,6 +8,10 @@ console:
 shell:
 	docker-compose exec api bash
 
+.PHONY: test-dev
+test-dev:
+	docker-compose exec api pipenv run ptw
+
 .PHONY: test
 ## Runs the tests
 test:

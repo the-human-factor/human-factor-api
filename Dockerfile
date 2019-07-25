@@ -2,8 +2,14 @@
 FROM debian:10.0 AS dev-env
 
 RUN apt-get update -y && \
-    apt-get install -y python3-dev python3-pip postgresql-client libpq-dev && \
-    update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 1 && \
+    apt-get install -y wget gnupg && \
+    echo "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+
+RUN apt-get update -y && \
+    apt-get install -y python3-dev python3-pip postgresql-client-11 libpq-dev && \
+    update-alternatives --install /usr/local/bin/python python /usr/bin/python3.5 1 && \
+>>>>>>> 5b72c60... Adds postgres-client to image
     update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3 1 && \
     rm -rf /var/lib/apt/lists/*
 
@@ -30,8 +36,13 @@ COPY . /app
 FROM debian:10.0 AS prod-env
 
 RUN apt-get update -y && \
+<<<<<<< HEAD
     apt-get install -y python3-dev python3-pip postgresql-client libpq-dev && \
     update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 1 && \
+=======
+    apt-get install -y python3-dev python3-pip postgresql-client-11 libpq-dev && \
+    update-alternatives --install /usr/local/bin/python python /usr/bin/python3.5 1 && \
+>>>>>>> 5b72c60... Adds postgres-client to image
     update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3 1 && \
     rm -rf /var/lib/apt/lists/*
 

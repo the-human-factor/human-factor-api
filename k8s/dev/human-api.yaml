@@ -35,7 +35,11 @@ spec:
                 secretKeyRef:
                   name: human-api-db-postgresql
                   key: postgresql-password
+<<<<<<< HEAD
             - name: FLASK_JWT_SECRET_KEY
+=======
+            - name: JWT_SECRET_KEY
+>>>>>>> 0dd1531... Get auth code running with jwt
               valueFrom:
                 secretKeyRef:
                   name: human-api-jwt-secret

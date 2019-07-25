@@ -19,6 +19,9 @@ def create_app(name=__name__):
   app = Flask(name)
   FlaskDynaconf(app) # Initialize config
 
+  app.config['JWT_BLACKLIST_ENABLED'] = True
+  app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['refresh']
+
   app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
     app.config['DB_USER'],
     app.config['DB_PASSWORD'],

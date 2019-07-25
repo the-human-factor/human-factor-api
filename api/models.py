@@ -14,7 +14,6 @@ from sqlalchemy.orm import backref
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 
-
 bcrypt = Bcrypt()
 db = SQLAlchemy()
 
@@ -69,7 +68,7 @@ class User(BaseModel):
   __tablename__ = 'users'
 
   id = db.Column(UUID(as_uuid=True), server_default=sqlalchemy.text("gen_random_uuid()"), primary_key=True)
-  full_name = db.Column(db.Unicode(255))
+  full_name = db.Column(db.Unicode(255), nullable=False)
   email = db.Column(db.String(255), unique=True, nullable=False)
   password = db.Column(db.String(255), nullable=False)
 
