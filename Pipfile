@@ -27,7 +27,6 @@ gunicorn = "*"
 dynaconf = "*"
 flask-cors = "*"
 psycopg2-binary = "*"
-bcrypt = "*"
 flask-jwt-extended = "*"
 flask-bcrypt = "*"
 
