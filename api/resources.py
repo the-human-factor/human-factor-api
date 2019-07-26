@@ -15,23 +15,21 @@ import api.schemas as s
 
 jwt = JWTManager()
 
-@jwt.token_in_blacklist_loader
-def check_if_token_in_blacklist(decrypted_token):
-  jti = decrypted_token['jti']
-  row = m.BlacklistedToken.query.get(decrypted_token['jti'])
-  return bool(row)
-
 def create_access_token_with_claims(user_id):
   # TODO: Implement claims
   claims = {'roles': [{'admin': 'admin'},]}
-  return create_access_token(identity=user_id, user_claims=claims),
+  return create_access_token(identity=user_id, user_claims=claims)
 
 class UserRegister(Resource):
   def post(self):
-    json = request.get_json()
-    full_name = json.get('full_name')
-    email = json.get('email')
-    password = json.get('password')
+    try:
+      json = request.get_json()
+      full_name = json.get('full_name')
+      email = json.get('email')
+      password = json.get('password')
+    except (KeyError, AttributeError) as e:
+      print("Request missing values")
+      abort(400)
 
     user = m.User.query.filter_by(email=email).one_or_none()
 
@@ -56,9 +54,13 @@ class UserRegister(Resource):
 
 class UserLogin(Resource):
   def post(self):
-    json = request.get_json()
-    username = json.get('email')
-    password = json.get('password')
+    try:
+      json = request.get_json()
+      username = json.get('email')
+      password = json.get('password')
+    except (KeyError, AttributeError) as e:
+      print("Request missing values")
+      abort(400)
 
     user = m.User.query.filter_by(email=username).first()
 
@@ -102,14 +104,26 @@ class UserLogout(Resource):
     return 201
 
 
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+  row = m.BlacklistedToken.query.get(decrypted_token['jti'])
+  return bool(row)
+
+
 class Video(Resource):
+  @jwt_required
   def get(self, video_id):
     video = m.Video.query.get_or_404(video_id)
     return s.VideoSchema().jsonify(video).json, 200
 
 
 class CreateVideo(Resource):
+  @jwt_required
   def post(self):
+    if 'video_blob' not in request.files:
+      print("Request missing values")
+      abort(400)
+
     video_blob = request.files['video_blob']
     video = m.Video.create_and_upload(video_blob)
     return s.VideoSchema().jsonify(video).json, 201
@@ -126,10 +140,14 @@ class CreateChallenge(Resource):
   def post(self):
     user = m.User.query.get(get_jwt_identity())
 
-    title = request.form['title']
-    instructions = request.form['instructions']
-    grading_notes = request.form['grading_notes']
-    video_blob = request.files['video_blob']
+    try:
+      title = request.form['title']
+      instructions = request.form['instructions']
+      grading_notes = request.form['grading_notes']
+      video_blob = request.files['video_blob']
+    except (KeyError, AttributeError) as e:
+      print("Request missing values")
+      abort(400)
 
     video = m.Video().create_and_upload(video_blob)
 
@@ -177,8 +195,12 @@ class CreateResponse(Resource):
   def post(self):
     user = m.User.query.get(get_jwt_identity())
 
-    challenge_id = request.form['challenge_id']
-    video_blob = request.files['video_blob']
+    try:
+      challenge_id = request.form['challenge_id']
+      video_blob = request.files['video_blob']
+    except (KeyError, AttributeError) as e:
+      print("Request missing values")
+      abort(400)
 
     video = m.Video().create_and_upload(video_blob)
     challenge = m.Challenge.query.get_or_404(challenge_id)

@@ -35,7 +35,7 @@ spec:
                 secretKeyRef:
                   name: human-api-db-postgresql
                   key: postgresql-password
-            - name: JWT_SECRET_KEY
+            - name: FLASK_JWT_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: human-api-jwt-secret

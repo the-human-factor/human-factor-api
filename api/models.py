@@ -105,10 +105,7 @@ class User(db.Model):
   def __init__(self, full_name, email, password):
     self.full_name = full_name
     self.email = email
-    self.password = bcrypt.generate_password_hash(
-        password,
-        current_app.config.get("BCRYPT_LOG_ROUNDS")
-    ).decode()
+    self.password = bcrypt.generate_password_hash(password).decode()
 
   def check_password(self, password):
     return bcrypt.check_password_hash(self.password, password)
