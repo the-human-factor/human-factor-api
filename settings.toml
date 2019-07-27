@@ -6,6 +6,7 @@ DB_HOST="db"
 DB_NAME="human_factor"
 SQLALCHEMY_TRACK_MODIFICATIONS="False"
 VIDEO_BUCKET="dev.videos.thehumanfactor.ai"
+JWT_SECRET_KEY="fake-secret"
 JWT_BLACKLIST_ENABLED="True"
 JWT_BLACKLIST_TOKEN_CHECKS="refresh"
 
