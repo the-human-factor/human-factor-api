@@ -1,16 +1,16 @@
 # Dev stage
-FROM debian:9.9 AS dev-env
+FROM debian:10.0 AS dev-env
 
 RUN apt-get update -y && \
     apt-get install -y python3-dev python3-pip postgresql-client libpq-dev && \
-    update-alternatives --install /usr/local/bin/python python /usr/bin/python3.5 1 && \
+    update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 1 && \
     update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3 1 && \
     rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m human
-USER human
-
 WORKDIR /app
+
+RUN useradd -m human && chown -R human /app
+USER human
 
 ENV PATH="/home/human/.local/bin:${PATH}"
 
@@ -27,18 +27,18 @@ RUN pip install pipenv && pipenv install --dev
 COPY . /app
 
 # Prod stage
-FROM debian:9.9 AS prod-env
+FROM debian:10.0 AS prod-env
 
 RUN apt-get update -y && \
     apt-get install -y python3-dev python3-pip postgresql-client libpq-dev && \
-    update-alternatives --install /usr/local/bin/python python /usr/bin/python3.5 1 && \
+    update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 1 && \
     update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3 1 && \
     rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m human
-USER human
-
 WORKDIR /app
+
+RUN useradd -m human && chown -R human /app
+USER human
 
 ENV PATH="/home/human/.local/bin:${PATH}"
 
