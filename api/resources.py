@@ -6,19 +6,13 @@ from sqlalchemy.orm import joinedload
 from flask import request, abort, jsonify, current_app
 from flask_restful import Resource
 from flask_jwt_extended import (
-    jwt_required, create_access_token, create_refresh_token,
-    get_jwt_identity, jwt_refresh_token_required, JWTManager,
-    get_raw_jwt)
+  jwt_required, get_jwt_identity,
+  jwt_refresh_token_required, JWTManager, get_raw_jwt)
 
 import api.models as m
 import api.schemas as s
 
 jwt = JWTManager()
-
-def create_access_token_with_claims(user_id):
-  # TODO: Implement claims
-  claims = {'roles': [{'admin': 'admin'},]}
-  return create_access_token(identity=user_id, user_claims=claims)
 
 class UserRegister(Resource):
   def post(self):
@@ -39,14 +33,13 @@ class UserRegister(Resource):
           'message': 'User already exists. Please log in.',
       }, 202
 
-    user = m.User(full_name=full_name,
-                  email=email,
-                  password=password)
-    user.save()
+    user = m.User.create(full_name=full_name,
+                         email=email,
+                         password=password)
 
     return {
-        'access_token': create_access_token_with_claims(user.id),
-        'refresh_token': create_refresh_token(identity=user.id),
+        'access_token': user.create_access_token_with_claims(),
+        'refresh_token': user.create_refresh_token(),
         'user': s.UserSchema().dump(user)
     }, 200
 
@@ -66,8 +59,8 @@ class UserLogin(Resource):
 
     if user and user.check_password(password):
       ret = {
-          'access_token': create_access_token_with_claims(user.id),
-          'refresh_token': create_refresh_token(identity=user.id),
+          'access_token': user.create_access_token_with_claims(),
+          'refresh_token': user.create_refresh_token(),
           'user': s.UserSchema().dump(user)
       }
       return ret, 200
@@ -84,7 +77,7 @@ class UserRefresh(Resource):
     user_id = get_jwt_identity()
     user = m.User.query.get(user_id)
     return {
-        'access_token': create_access_token_with_claims(user_id),
+        'access_token': user.create_access_token_with_claims(),
         'user': s.UserSchema().dump(user)
     }, 200
 
@@ -95,11 +88,9 @@ class UserLogout(Resource):
     token = get_raw_jwt()
     jti = token['jti']
     exp = token['exp']
-    blacklisted_token = m.BlacklistedToken(
-        jti = jti,
-        exp = datetime.utcfromtimestamp(exp)
-    )
-    blacklisted_token.save()
+    blacklisted_token = m.BlacklistedToken.create(
+      jti=jti,
+      exp=datetime.utcfromtimestamp(exp))
 
     return 201
 
@@ -151,15 +142,12 @@ class CreateChallenge(Resource):
 
     video = m.Video().create_and_upload(video_blob)
 
-    challenge = m.Challenge(
-      title = title,
-      instructions = instructions,
-      grading_notes = grading_notes,
-      user = user,
-      video = video
-    )
-
-    challenge.save()
+    challenge = m.Challenge.create(
+      title=title,
+      instructions=instructions,
+      grading_notes=grading_notes,
+      user=user,
+      video=video)
 
     return s.ChallengeSchema().jsonify(challenge).json, 201
 
@@ -205,12 +193,9 @@ class CreateResponse(Resource):
     video = m.Video().create_and_upload(video_blob)
     challenge = m.Challenge.query.get_or_404(challenge_id)
 
-    response = m.Response(
-      challenge = challenge,
-      user = user,
-      video = video
-    )
-
-    response.save()
+    response = m.Response.create(
+      challenge=challenge,
+      user=user,
+      video=video)
 
     return s.ResponseSchema().jsonify(response).json, 201

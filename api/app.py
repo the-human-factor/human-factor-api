@@ -15,8 +15,8 @@ import api.routes as routes
 import api.resources as resources
 
 
-def create_app():
-  app = Flask(__name__)
+def create_app(name=__name__):
+  app = Flask(name)
   FlaskDynaconf(app) # Initialize config
 
   app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
@@ -29,6 +29,8 @@ def create_app():
 
   cors = CORS(app, resources={r"/api/*": {"origins": app.config['ALLOWED_ORIGINS']}})
   models.db.init_app(app) # This needs to come before Marshmallow
+  models.BaseModel.set_session(models.db.session)
+  app.db = models.db
   migrate = Migrate(app, models.db)
   ma = Marshmallow(app)
   routes.api.init_app(app)
@@ -50,17 +52,5 @@ def create_app():
             **module_classes_as_dict('api.models'),
             **module_classes_as_dict('api.schemas'),
             **module_classes_as_dict('api.tests.factories')}
-
-
-  @app.after_request
-  def session_commit(response):
-    if response.status_code >= 400:
-      return response
-    try:
-      models.db.session.commit()
-      return response
-    except DatabaseError:
-      models.db.session.rollback()
-      raise
 
   return app
