@@ -7,16 +7,16 @@ verify_ssl = true
 flask-shell-ipython = "*"
 pytest = "==4.6.3"
 pytest-flask = "*"
-pytest-flask-sqlalchemy = "*"
 pytest-factoryboy = "*"
-ipdb = "*"
 pytest-watch = "*"
+mock = "*"
+pytest-mock = "*"
+pdbpp = "*"
 
 [packages]
 flask-sqlalchemy = "*"
 flask = "*"
 flask-migrate = "*"
-pytest-flask-sqlalchemy = "*"
 flask-restful = "*"
 marshmallow-sqlalchemy = "*"
 marshmallow = "*"
@@ -29,6 +29,7 @@ flask-cors = "*"
 psycopg2-binary = "*"
 flask-jwt-extended = "*"
 flask-bcrypt = "*"
+sqlalchemy-mixins = "*"
 
 [requires]
 python_version = "3.7"

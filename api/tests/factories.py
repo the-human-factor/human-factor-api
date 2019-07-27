@@ -16,8 +16,9 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     model = m.User
     sqlalchemy_session = m.db.session
 
-  name = factory.Faker('name')
+  full_name = factory.Faker('name')
   email = factory.Faker('email')
+  password = factory.Faker('password')
 
 
 class ChallengeFactory(factory.alchemy.SQLAlchemyModelFactory):
