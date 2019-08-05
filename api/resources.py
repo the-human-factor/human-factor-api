@@ -39,7 +39,7 @@ class CreateChallenge(Resource):
     user_name = request.form['name']
     user_email = request.form['email']
 
-    user = m.User.query.filter_by(name=user_name, email=user_email).one_or_none()
+    user = m.User.query.filter_by(email=user_email).one_or_none()
 
     if user == None:
       user = m.User(
@@ -97,7 +97,7 @@ class CreateResponse(Resource):
     user_name = request.form['name']
     user_email = request.form['email']
 
-    user = m.User.query.filter_by(name=user_name, email=user_email).one_or_none()
+    user = m.User.query.filter_by(email=user_email).one_or_none()
 
     if user == None:
       user = m.User(
