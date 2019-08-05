@@ -59,8 +59,8 @@ class Video(db.Model):
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(current_app.config['VIDEO_BUCKET'])
     blob = bucket.blob("{}.webm".format(video.id),
-                       cache_control=CACHE_CONTROL,
-                       content_type=CONTENT_TYPE)
+                       cache_control=Video.CACHE_CONTROL,
+                       content_type=Video.CONTENT_TYPE)
 
     blob.upload_from_file(file.stream, predefined_acl="publicRead")
 
