@@ -41,9 +41,6 @@ db = SQLAlchemy(model_class=MyBase)
 class Video(db.Model):
   __tablename__ = 'videos'
 
-  CONTENT_TYPE = "video/webm"
-  CACHE_CONTROL = "public max-age=31536000"
-
   id = db.Column(UUID(as_uuid=True), server_default=sqlalchemy.text("gen_random_uuid()"), primary_key=True)
 
   url = db.Column(db.String(512))
@@ -58,9 +55,7 @@ class Video(db.Model):
 
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(current_app.config['VIDEO_BUCKET'])
-    blob = bucket.blob("{}.webm".format(video.id),
-                       cache_control=Video.CACHE_CONTROL,
-                       content_type=Video.CONTENT_TYPE)
+    blob = bucket.blob("{}.webm".format(video.id))
 
     blob.upload_from_file(file.stream, predefined_acl="publicRead")
 
