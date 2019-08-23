@@ -9,10 +9,10 @@ VIDEO_BUCKET="dev.videos.thehumanfactor.ai"
 JWT_SECRET_KEY="fake-secret"
 JWT_BLACKLIST_ENABLED="True"
 JWT_BLACKLIST_TOKEN_CHECKS="refresh"
+ALLOWED_ORIGINS="*"
 
 [development]
 DB_HOST="db"
-ALLOWED_ORIGINS="http://localhost:3000"
 
 [testing]
 
