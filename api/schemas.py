@@ -12,7 +12,7 @@ class VideoSchema(ModelSchema):
 class UserSchema(ModelSchema):
   class Meta:
     model = models.User
-    exclude = ["challenges", "password", "email"]
+    exclude = ["challenges", "_password", "email"]
 
 
 class ChallengeSchema(ModelSchema):
