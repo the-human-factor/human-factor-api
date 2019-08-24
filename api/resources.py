@@ -31,7 +31,7 @@ class UserRegister(Resource):
       return {
           'error': 'EmailExists',
           'message': 'User already exists. Please log in.',
-      }, 202
+      }, 409
 
     user = m.User.create(full_name=full_name,
                          email=email,
@@ -41,8 +41,7 @@ class UserRegister(Resource):
         'access_token': user.create_access_token_with_claims(),
         'refresh_token': user.create_refresh_token(),
         'user': s.UserSchema().dump(user)
-    }, 200
-
+    }, 201
 
 
 class UserLogin(Resource):
@@ -73,7 +72,7 @@ class UserLogin(Resource):
 
 class UserRefresh(Resource):
   @jwt_refresh_token_required
-  def get(self):
+  def post(self):
     user_id = get_jwt_identity()
     user = m.User.query.get(user_id)
     return {

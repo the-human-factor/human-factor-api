@@ -2,7 +2,7 @@ import uuid
 import pytest
 from unittest.mock import PropertyMock
 
-from api.app import create_app
+from api.app import create_app, db
 from api.models import BaseModel
 import api.tests.factories as f
 
@@ -10,7 +10,6 @@ import api.tests.factories as f
 @pytest.fixture(scope='session')
 def app(request):
   app = create_app(__name__)
-
   ctx = app.app_context()
   ctx.push()
 
@@ -20,36 +19,40 @@ def app(request):
   request.addfinalizer(teardown)
   return app
 
-@pytest.fixture(scope='session')
-def db(app, request):
-  return app.db
-
-@pytest.fixture(scope='function')
-def session(db, request):
-  connection = db.engine.connect()
-  transaction = connection.begin()
-
-  options = dict(bind=connection, binds={})
-  session = db.create_scoped_session(options=options)
-  db.session = session
-
-  BaseModel.set_session(session)
+@pytest.fixture(autouse=True, scope='function')
+def session(app, request):
+  # No committing during tests
+  db.session.commit = db.session.flush
 
   def teardown():
-    transaction.rollback()
-    connection.close()
-    session.remove()
+    db.session.rollback()
 
   request.addfinalizer(teardown)
-  return session
+  return db.session
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def user():
-  return f.UserFactory().save()
+  return f.UserFactory(password='hunter2').save()
 
-@pytest.fixture
+@pytest.fixture(scope='function')
 def access_token(user):
   return user.create_access_token_with_claims()
+
+@pytest.fixture(scope='function')
+def refresh_token(user):
+  return user.create_refresh_token()
+
+@pytest.fixture(scope='function')
+def video():
+  return f.VideoFactory.create().save()
+
+@pytest.fixture(scope='function')
+def challenge():
+  return f.ChallengeFactory.create().save()
+
+@pytest.fixture(scope='function')
+def response():
+  return f.ResponseFactory.create().save()
 
 @pytest.fixture(autouse=True)
 def mock_storage(mocker):
