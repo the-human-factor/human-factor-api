@@ -30,8 +30,8 @@ class ChallengeFactory(factory.alchemy.SQLAlchemyModelFactory):
   instructions = factory.Faker('text')
   grading_notes = factory.Faker('text')
 
+  user = factory.SubFactory(UserFactory)
   video = factory.SubFactory(VideoFactory)
-  creator = factory.SubFactory(UserFactory)
 
 
 class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):

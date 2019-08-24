@@ -2,25 +2,18 @@ from datetime import datetime
 
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy, Model
-from flask_bcrypt import Bcrypt
 from google.cloud import storage
 from flask_sqlalchemy import SQLAlchemy, Model
 from flask_jwt_extended import create_access_token, create_refresh_token
 
 import sqlalchemy
-from sqlalchemy_mixins import AllFeaturesMixin
 from sqlalchemy.exc import DatabaseError
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 
-
-bcrypt = Bcrypt()
-db = SQLAlchemy()
-
-class BaseModel(db.Model, AllFeaturesMixin):
-  __abstract__ = True
-  pass
+from api.app import db, bcrypt, BaseModel
 
 class Video(BaseModel):
   __tablename__ = 'videos'
@@ -71,15 +64,18 @@ class User(BaseModel):
   id = db.Column(UUID(as_uuid=True), server_default=sqlalchemy.text("gen_random_uuid()"), primary_key=True)
   full_name = db.Column(db.Unicode(255))
   email = db.Column(db.String(255), unique=True, nullable=False)
-  password = db.Column(db.String(255), nullable=False)
+  _password = db.Column('password', db.String(255), nullable=False)
 
   created_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
   updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=datetime.utcnow, nullable=False)
 
-  def __init__(self, full_name, email, password):
-    self.full_name = full_name
-    self.email = email
-    self.password = bcrypt.generate_password_hash(password).decode()
+  @hybrid_property
+  def password(self):
+    return self._password
+
+  @password.setter
+  def password(self, password):
+    self._password = bcrypt.generate_password_hash(password).decode()
 
   def check_password(self, password):
     return bcrypt.check_password_hash(self.password, password)
