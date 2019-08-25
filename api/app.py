@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 
 from dynaconf import FlaskDynaconf
 from sqlalchemy.exc import DatabaseError
@@ -20,6 +21,9 @@ class BaseModel(db.Model, AllFeaturesMixin):
   pass
 
 def create_app(name=__name__):
+  import api.routes as routes
+  import api.resources as resources
+
   app = Flask(name)
   FlaskDynaconf(app) # Initialize config
 
@@ -31,33 +35,40 @@ def create_app(name=__name__):
 
   app.logger.info('App configured to talk to DB: %s', app.config['SQLALCHEMY_DATABASE_URI'])
 
-  with app.app_context():
-    import api.routes as routes
-    import api.resources as resources
+  cors = CORS(app, resources={r"/api/*": {"origins": app.config['ALLOWED_ORIGINS']}})
+  db.init_app(app) # This needs to come before Marshmallow
+  BaseModel.set_session(db.session)
+  migrate = Migrate(app, db)
+  ma = Marshmallow(app)
+  routes.api.init_app(app)
+  resources.jwt.init_app(app)
+  bcrypt.init_app(app)
 
-    cors = CORS(app, resources={r"/api/*": {"origins": app.config['ALLOWED_ORIGINS']}})
-    db.init_app(app) # This needs to come before Marshmallow
-    BaseModel.set_session(db.session)
-    migrate = Migrate(app, db)
-    ma = Marshmallow(app)
-    routes.api.init_app(app)
-    resources.jwt.init_app(app)
-    bcrypt.init_app(app)
+  @app.route('/healthcheck')
+  def healthcheck():
+    return 'ok'
 
-    @app.route('/healthcheck')
-    def healthcheck():
-      return 'ok'
+  @app.shell_context_processor
+  def make_shell_context():
+    """
+     Adds these to the global scope of the shell for more convenient prototyping/debugging in the shell
+     """
+    from api.utils import module_classes_as_dict
 
-    @app.shell_context_processor
-    def make_shell_context():
-      """
-       Adds these to the global scope of the shell for more convenient prototyping/debugging in the shell
-       """
-      from api.utils import module_classes_as_dict
+    return {'db': db,
+            **module_classes_as_dict('api.models'),
+            **module_classes_as_dict('api.schemas'),
+            **module_classes_as_dict('api.tests.factories')}
 
-      return {'db': db,
-              **module_classes_as_dict('api.models'),
-              **module_classes_as_dict('api.schemas'),
-              **module_classes_as_dict('api.tests.factories')}
+  @app.after_request
+  def session_commit(res):
+    if res.status_code >= 400:
+      return res
+    try:
+      db.session.commit()
+      return res
+    except DatabaseError:
+      db.session.rollback()
+      raise
 
-    return app
+  return app

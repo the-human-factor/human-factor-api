@@ -4,7 +4,6 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-flask-shell-ipython = "*"
 pytest = "==4.6.3"
 pytest-flask = "*"
 pytest-factoryboy = "*"
@@ -30,6 +29,7 @@ psycopg2-binary = "*"
 flask-jwt-extended = "*"
 flask-bcrypt = "*"
 sqlalchemy-mixins = "*"
+flask-shell-ipython = "*"
 
 [requires]
 python_version = "3.7"
