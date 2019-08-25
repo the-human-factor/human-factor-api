@@ -54,10 +54,10 @@ jobs:
             gcloud container clusters get-credentials main-1
 
       - run:
-          name: Deploy to prod namespace
+          name: Deploy to staging namespace
           command: |
             kubectl config set-context --current --namespace=staging
-            kubectl set image deployment human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
+            kubectl set image deployment staging-human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
 
 
   deploy-prod:
@@ -75,7 +75,7 @@ jobs:
           name: Deploy to prod namespace
           command: |
             kubectl config set-context --current --namespace=production
-            kubectl set image deployment human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
+            kubectl set image deployment production-human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
 
 workflows:
   version: 2
