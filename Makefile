@@ -23,11 +23,6 @@ psql:
 migrate:
 	docker-compose exec api pipenv run flask db upgrade
 
-.PHONY: db-reset
-## remove the docker db volume and recreate the image
-db-reset:
-	docker-compose build api && docker-compose down && docker volume rm human-factor-api_devdb && docker-compose up --force-recreate -d api
-
 #################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################
