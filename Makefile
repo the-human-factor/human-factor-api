@@ -13,6 +13,11 @@ shell:
 test:
 	docker-compose exec api pipenv run pytest
 
+.PHONY: test-dev
+## Runs the tests
+test-dev:
+	docker-compose exec api pipenv run ptw
+
 .PHONY: psql
 ## Creates a postgres shell in the `db` container
 psql:
