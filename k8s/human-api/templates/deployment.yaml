@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "human-api.fullname" . }}-deployment
+  labels:
+    app: {{ template "human-api.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "human-api.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "human-api.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: credentials
+              mountPath: "/credentials"
+              readOnly: true
+          env:
+            - name: FLASK_ENV
+              value: production
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /credentials/google-credentials.json
+            - name: FLASK_DB_HOST
+              value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
+            - name: FLASK_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.global.postgresql.existingSecret }}
+                  key: postgresql-password
+            - name: FLASK_JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "human-api.name" . }}-jwt-secret
+                  key: secret
+
+      volumes:
+        - name: credentials
+          secret:
+            secretName: google-credentials
+            items:
+              - key: google-credentials.json
+                path: google-credentials.json

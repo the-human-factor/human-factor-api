@@ -1,0 +1,49 @@
+# Default values for human-api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+postgresql:
+  persistence:
+    size: 8Gi
+  global:
+    postgresql:
+      existingSecret: test-postgresql
+
+
+environment: test
+replicaCount: 1
+
+image:
+  repository: gcr.io/the-human-factor/human-api
+  tag: master
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  port: 9000
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    certmanager.k8s.io/acme-challenge-type: http01
+  hosts:
+    - host: test.api.thehumanfactor.ai
+      paths:
+        - path: /api
+          port: 9000
+  tls:
+    - secretName: human-api-cert-test
+      hosts:
+        - test.api.thehumanfactor.ai
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

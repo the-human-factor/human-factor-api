@@ -1,44 +1,21 @@
-import uuid
-
 from datetime import datetime
+
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy, Model
+from google.cloud import storage
+from flask_sqlalchemy import SQLAlchemy, Model
+from flask_jwt_extended import create_access_token, create_refresh_token
 
 import sqlalchemy
 from sqlalchemy.exc import DatabaseError
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 
-from google.cloud import storage
+from api.app import db, bcrypt, BaseModel
 
-# Lifted from https://chase-seibert.github.io/blog/2016/03/31/flask-sqlalchemy-sessionless.html
-class MyBase(Model):
-  '''Adds convenience methods to every model instance. '''
-  def save(self):
-    db.session.add(self)
-    self._flush()
-    return self
-
-  def update(self, **kwargs):
-    for attr, value in kwargs.items():
-      setattr(self, attr, value)
-      return self.save()
-
-  def delete(self):
-    db.session.delete(self)
-    self._flush()
-
-  def _flush(self):
-    try:
-      db.session.flush()
-    except DatabaseError:
-      db.session.rollback()
-      raise
-
-db = SQLAlchemy(model_class=MyBase)
-
-class Video(db.Model):
+class Video(BaseModel):
   __tablename__ = 'videos'
 
   id = db.Column(UUID(as_uuid=True), server_default=sqlalchemy.text("gen_random_uuid()"), primary_key=True)
@@ -50,9 +27,7 @@ class Video(db.Model):
 
   @staticmethod
   def create_and_upload(file):
-    video = Video()
-    video.save()
-
+    video = Video.create()
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(current_app.config['VIDEO_BUCKET'])
     blob = bucket.blob("{}.webm".format(video.id))
@@ -63,11 +38,8 @@ class Video(db.Model):
 
     return video
 
-  def __repr__(self):
-    return '<Video:{}>'.format(self.id)
 
-
-class Challenge(db.Model):
+class Challenge(BaseModel):
   __tablename__ = 'challenges'
 
   id = db.Column(UUID(as_uuid=True), server_default=sqlalchemy.text("gen_random_uuid()"), primary_key=True)
@@ -85,26 +57,45 @@ class Challenge(db.Model):
   created_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
   updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=datetime.utcnow, nullable=False)
 
-  def __repr__(self):
-    return '<Challenge:{} - {}>'.format(self.id, self.title)
 
-
-class User(db.Model):
+class User(BaseModel):
   __tablename__ = 'users'
 
   id = db.Column(UUID(as_uuid=True), server_default=sqlalchemy.text("gen_random_uuid()"), primary_key=True)
-  name = db.Column(db.Unicode(255))
+  full_name = db.Column(db.Unicode(255))
   email = db.Column(db.String(255), unique=True, nullable=False)
-  # password = db.Column(db.Varchar(255))
+  _password = db.Column('password', db.String(255), nullable=False)
 
   created_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
   updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=datetime.utcnow, nullable=False)
 
-  def __repr__(self):
-    return '<User:{} - {}>'.format(self.id, self.email)
+  @hybrid_property
+  def password(self):
+    return self._password
+
+  @password.setter
+  def password(self, password):
+    self._password = bcrypt.generate_password_hash(password).decode()
+
+  def check_password(self, password):
+    return bcrypt.check_password_hash(self.password, password)
+
+  def create_access_token_with_claims(self):
+    # TODO: Implement claims
+    claims = {'roles': [{'admin': 'admin'},]}
+    return create_access_token(identity=self.id, user_claims=claims)
+
+  def create_refresh_token(self):
+    return create_refresh_token(identity=self.id)
+
+class BlacklistedToken(BaseModel):
+  __tablename__ = 'blacklisted_tokens'
+
+  jti = db.Column(db.String(64), primary_key=True)
+  exp = db.Column(db.DateTime(timezone=True), nullable=False)
 
 
-class Response(db.Model):
+class Response(BaseModel):
   __tablename__ = 'responses'
 
   id = db.Column(UUID(as_uuid=True), server_default=sqlalchemy.text("gen_random_uuid()"), primary_key=True)
@@ -120,6 +111,3 @@ class Response(db.Model):
 
   created_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
   updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=datetime.utcnow, nullable=False)
-
-  def __repr__(self):
-    return '<Response:{} - {}:{}>'.format(self.id, self.challenge.name, self.responder.name)

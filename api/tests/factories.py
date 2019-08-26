@@ -16,8 +16,9 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     model = m.User
     sqlalchemy_session = m.db.session
 
-  name = factory.Faker('name')
+  full_name = factory.Faker('name')
   email = factory.Faker('email')
+  password = factory.Faker('password')
 
 
 class ChallengeFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -29,8 +30,8 @@ class ChallengeFactory(factory.alchemy.SQLAlchemyModelFactory):
   instructions = factory.Faker('text')
   grading_notes = factory.Faker('text')
 
+  user = factory.SubFactory(UserFactory)
   video = factory.SubFactory(VideoFactory)
-  creator = factory.SubFactory(UserFactory)
 
 
 class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):

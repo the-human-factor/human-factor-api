@@ -8,10 +8,12 @@ class VideoSchema(ModelSchema):
     model = models.Video
     exclude = ('response', 'challenges')
 
+
 class UserSchema(ModelSchema):
   class Meta:
     model = models.User
-    exclude = ('challenges',)
+    exclude = ["challenges", "_password", "email"]
+
 
 class ChallengeSchema(ModelSchema):
   class Meta:
@@ -19,6 +21,7 @@ class ChallengeSchema(ModelSchema):
 
   video = fields.Nested(VideoSchema)
   user = fields.Nested(UserSchema)
+
 
 class ResponseSchema(ModelSchema):
   class Meta:

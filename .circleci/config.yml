@@ -5,8 +5,6 @@ executors:
     docker:
       - image: google/cloud-sdk
 
-
-
 jobs:
   build:
     working_directory: ~/repo
@@ -41,10 +39,10 @@ jobs:
           name: Build, tag and push Docker image
           command: |
             docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} .
-            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:$(git rev-parse --abbrev-ref HEAD)
+            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')
             docker push gcr.io/the-human-factor/human-api
 
-  deploy-dev:
+  deploy-staging:
     executor: gcp
     steps:
       - run:
@@ -56,17 +54,17 @@ jobs:
             gcloud container clusters get-credentials main-1
 
       - run:
-          name: Deploy to dev namespace
+          name: Deploy to staging namespace
           command: |
-            kubectl config set-context --current --namespace=development
-            kubectl set image deployment human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
+            kubectl config set-context --current --namespace=staging
+            kubectl set image deployment staging-human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
 
 workflows:
   version: 2
   build:
     jobs:
       - build
-      - deploy-dev:
+      - deploy-staging:
           filters:
             branches:
               only:
