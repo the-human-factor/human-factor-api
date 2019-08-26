@@ -59,37 +59,12 @@ jobs:
             kubectl config set-context --current --namespace=staging
             kubectl set image deployment staging-human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
 
-
-  deploy-prod:
-    executor: gcp
-    steps:
-      - run:
-          name: Auth with GCP
-          command: |
-            echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
-            gcloud config set project $GOOGLE_PROJECT_ID
-            gcloud config set compute/zone $GOOGLE_COMPUTE_ZONE
-            gcloud container clusters get-credentials main-1
-
-      - run:
-          name: Deploy to prod namespace
-          command: |
-            kubectl config set-context --current --namespace=production
-            kubectl set image deployment production-human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
-
 workflows:
   version: 2
   build:
     jobs:
       - build
       - deploy-staging:
-          filters:
-            branches:
-              only:
-                - staging
-          requires:
-            - build
-      - deploy-prod:
           filters:
             branches:
               only:
