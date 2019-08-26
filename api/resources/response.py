@@ -17,12 +17,7 @@ class Response(Resource):
 class ResponseList(Resource):
   @jwt_required
   def get(self):
-    responses = m.Response.query.options(
-      joinedload('challenge'),
-      joinedload('user'),
-      joinedload('video')
-    ).all()
-
+    responses = m.Response.all()
     return s.ResponseSchema(many=True).jsonify(responses).json, 200
 
 
