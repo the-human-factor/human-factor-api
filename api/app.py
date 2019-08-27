@@ -1,6 +1,9 @@
 import os
+import sys
+import uuid
 import json
 import logging
+import structlog
 
 from dynaconf import FlaskDynaconf
 from sqlalchemy.exc import DatabaseError
@@ -15,6 +18,7 @@ from sqlalchemy_mixins import AllFeaturesMixin
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+logger = structlog.get_logger()
 
 class BaseModel(db.Model, AllFeaturesMixin):
   __abstract__ = True
@@ -23,6 +27,16 @@ class BaseModel(db.Model, AllFeaturesMixin):
 def create_app(name=__name__):
   import api.routes as routes
   import api.resources as resources
+
+  logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.INFO) # TODO make level configurable
+
+  structlog.configure(
+    processors=[
+      structlog.processors.KeyValueRenderer(key_order=["event", "request_id"]),
+    ],
+    context_class=structlog.threadlocal.wrap_dict(dict),
+    logger_factory=structlog.stdlib.LoggerFactory()
+  )
 
   app = Flask(name)
   FlaskDynaconf(app) # Initialize config
@@ -43,6 +57,10 @@ def create_app(name=__name__):
   routes.api.init_app(app)
   resources.jwt.init_app(app)
   bcrypt.init_app(app)
+
+  @app.before_request
+  def set_request_id():
+    logger.new(request_id=str(uuid.uuid4()))
 
   @app.route('/healthcheck')
   def healthcheck():

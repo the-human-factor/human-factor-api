@@ -30,3 +30,9 @@ def test_list_responses(client, session, access_token):
 
   assert resp.status_code == 200
   assert len(resp.json) == 10
+
+  # check that the responses have the all the fields we expect
+  first = resp.json[0]
+  assert first['challenge'] != None
+  assert first['user'] != None
+  assert first['video'] != None

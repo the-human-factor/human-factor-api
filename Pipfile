@@ -11,6 +11,7 @@ pytest-watch = "*"
 mock = "*"
 pytest-mock = "*"
 pdbpp = "*"
+pytest-testmon = "*"
 
 [packages]
 flask-sqlalchemy = "*"
@@ -30,6 +31,7 @@ flask-jwt-extended = "*"
 flask-bcrypt = "*"
 sqlalchemy-mixins = "*"
 flask-shell-ipython = "*"
+structlog = "*"
 
 [requires]
 python_version = "3.7"
