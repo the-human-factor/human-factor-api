@@ -33,7 +33,6 @@ def test_list_responses(client, session, access_token):
 
   # check that the responses have the all the fields we expect
   first = resp.json[0]
-  import pdb; pdb.set_trace()
   assert first['challenge'] != None
   assert first['user'] != None
   assert first['video'] != None
