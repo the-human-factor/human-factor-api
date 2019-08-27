@@ -41,7 +41,7 @@ class UserRegister(Resource):
     return {
         'access_token': user.create_access_token_with_claims(),
         'refresh_token': user.create_refresh_token(),
-        'user': s.UserSchema().dump(user)
+        'user': s.UserSchema().jsonify(user).json
     }, 201
 
 
@@ -61,7 +61,7 @@ class UserLogin(Resource):
       ret = {
           'access_token': user.create_access_token_with_claims(),
           'refresh_token': user.create_refresh_token(),
-          'user': s.UserSchema().dump(user)
+          'user': s.UserSchema().jsonify(user).json
       }
       return ret, 200
 
@@ -78,7 +78,7 @@ class UserRefresh(Resource):
     user = m.User.query.get(user_id)
     return {
         'access_token': user.create_access_token_with_claims(),
-        'user': s.UserSchema().dump(user)
+        'user': s.UserSchema().jsonify(user).json
     }, 200
 
 class UserLogout(Resource):
