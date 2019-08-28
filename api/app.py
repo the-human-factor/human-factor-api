@@ -103,9 +103,6 @@ def config_logging(app):
 
   processors = [structlog.processors.KeyValueRenderer(key_order=["event", "request_id"])]
 
-  if app.config['ENV'] == 'development':
-    processors.append(structlog.processors.ExceptionPrettyPrinter())
-
   structlog.configure(
     processors=processors,
     context_class=structlog.threadlocal.wrap_dict(dict),

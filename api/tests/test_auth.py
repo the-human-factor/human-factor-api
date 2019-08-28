@@ -3,7 +3,7 @@ from flask import url_for
 import api.models as m
 import api.tests.factories as f
 
-def test_user_registration(client, session):
+def test_user_registration(client):
   """Can register a new user"""
   resp = client.post(url_for('userregister'),
                        json=dict(
@@ -21,6 +21,16 @@ def test_user_registration(client, session):
                          password='hunter2'))
 
   assert resp.status_code == 409
+
+def test_user_registration_missing_keys(client):
+  """Missing keys during registration causes a 400"""
+
+  resp = client.post(url_for('userregister'),
+                       json=dict(
+                         email='coolperson@example.com',
+                         password='hunter2'))
+
+  assert resp.status_code == 400
 
 def test_user_login(client, user):
   resp = client.post(url_for('userlogin'),

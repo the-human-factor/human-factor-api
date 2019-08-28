@@ -26,7 +26,7 @@ class UserRegister(Resource):
       email = json['email']
       password = json['password']
     except (KeyError, AttributeError) as e:
-      print("Request missing values")
+      logger.error("Request missing values", exc=e)
       abort(400)
 
     user = m.User.query.filter_by(email=email).one_or_none()
