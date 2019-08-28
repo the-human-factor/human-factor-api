@@ -1,4 +1,6 @@
 from flask import url_for
+
+import api.models as m
 import api.tests.factories as f
 
 def test_user_registration(client, session):
@@ -52,15 +54,19 @@ def test_refresh_token_missing(client, refresh_token):
   assert resp.status_code == 401
 
 def test_change_password_success(client, access_token):
+  new_password = 'Test123123'
   resp = client.put(url_for('userpassword'),
                     json=dict(
                       oldPassword='hunter2',
-                      password='Test123123'),
+                      password=new_password),
                     headers={'Authorization': f"Bearer {access_token}"})
 
   assert resp.status_code == 200
   assert resp.json['access_token'] != None
   assert resp.json['refresh_token'] != None
+
+  user = m.User.where(email='test-user@example.com').one_or_none()
+  assert user.check_password(new_password) == True
 
 def test_change_password_failure(client, access_token):
   resp = client.put(url_for('userpassword'),
@@ -70,3 +76,6 @@ def test_change_password_failure(client, access_token):
                     headers={'Authorization': f"Bearer {access_token}"})
 
   assert resp.status_code == 400
+
+  user = m.User.where(email='test-user@example.com').one_or_none()
+  assert user.check_password('hunter2') == True # old password
