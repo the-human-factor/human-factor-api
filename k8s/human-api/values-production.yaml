@@ -10,12 +10,12 @@ postgresql:
       existingSecret: production-postgresql
 
 
-environment: staging
+environment: production
 replicaCount: 2
 
 image:
   repository: gcr.io/the-human-factor/human-api
-  tag: staging
+  tag: production
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

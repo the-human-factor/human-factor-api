@@ -31,7 +31,7 @@ spec:
               readOnly: true
           env:
             - name: FLASK_ENV
-              value: production
+              value: {{ .Values.environment }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /credentials/google-credentials.json
             - name: FLASK_DB_HOST
