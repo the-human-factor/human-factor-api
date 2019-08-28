@@ -7,7 +7,7 @@ def test_user_registration(client, session):
   """Can register a new user"""
   resp = client.post(url_for('userregister'),
                        json=dict(
-                         full_name='Cool Person',
+                         fullName='Cool Person',
                          email='coolperson@example.com',
                          password='hunter2'))
 
@@ -16,7 +16,7 @@ def test_user_registration(client, session):
   # Cannot register more than once with the same email
   resp = client.post(url_for('userregister'),
                        json=dict(
-                         full_name='Cool Person',
+                         fullName='Cool Person',
                          email='coolperson@example.com',
                          password='hunter2'))
 
