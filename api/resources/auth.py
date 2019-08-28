@@ -22,11 +22,11 @@ class UserRegister(Resource):
   def post(self):
     try:
       json = request.get_json()
-      full_name = json.get('fullName')
-      email = json.get('email')
-      password = json.get('password')
+      full_name = json['fullName']
+      email = json['email']
+      password = json['password']
     except (KeyError, AttributeError) as e:
-      logger.error("Request missing values", e)
+      logger.error(event="Request missing values")
       abort(400)
 
     user = m.User.query.filter_by(email=email).one_or_none()
@@ -52,8 +52,8 @@ class UserPassword(Resource):
   def put(self):
     try:
       json = request.get_json()
-      old_password = json.get('oldPassword')
-      new_password = json.get('password')
+      old_password = json['oldPassword']
+      new_password = json['password']
     except (KeyError, AttributeError) as e:
       log.error("Request missing values")
       abort(400)
@@ -77,8 +77,8 @@ class UserLogin(Resource):
   def post(self):
     try:
       json = request.get_json()
-      username = json.get('email')
-      password = json.get('password')
+      username = json['email']
+      password = json['password']
     except (KeyError, AttributeError) as e:
       print("Request missing values")
       abort(400)

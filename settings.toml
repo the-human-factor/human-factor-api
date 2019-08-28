@@ -18,12 +18,15 @@ DB_HOST="db"
 
 [testing]
 SENTRY_RELEASE_ID="{{RELEASE_ID}}"
+SENTRY_DSN="https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502"
 
 [staging]
 DB_HOST="human-api-db-postgresql.staging.svc.cluster.local"
 VIDEO_BUCKET="staging.videos.thehumanfactor.ai"
 SENTRY_RELEASE_ID="{{RELEASE_ID}}"
+SENTRY_DSN="https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502"
 
 [production]
 VIDEO_BUCKET="prod.videos.thehumanfactor.ai"
 SENTRY_RELEASE_ID="{{RELEASE_ID}}"
+SENTRY_DSN="https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502"

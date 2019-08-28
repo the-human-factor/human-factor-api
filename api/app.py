@@ -35,7 +35,7 @@ def create_app(name=__name__):
   config_logging(app)
 
   sentry_sdk.init(
-    'https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502',
+    app.config['SENTRY_DSN'],
     integrations=[FlaskIntegration(transaction_style="url")],
     environment=app.config['ENV'],
     release=f"human-factor-api@{app.config['SENTRY_RELEASE_ID']}"
@@ -43,16 +43,16 @@ def create_app(name=__name__):
 
   app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
     app.config['DB_USER'],
-    app.config['DB_PASSWORD']
+    app.config['DB_PASSWORD'],
     app.config['DB_HOST'],
     app.config['DB_NAME'])
 
   app.logger.info('App configured to talk to DB: %s', "postgresql://{}:*REDACTED*@{}/{}".format(
     app.config['DB_USER'],
     app.config['DB_HOST'],
-    app.config['DB_NAME'])
+    app.config['DB_NAME']))
 
-  cors = CORS(app, resources={r"/api/*": {"origins": app.config['ALLOWED_ORIGINS']}})
+  cors = CORS(app, resources={r"*": {"origins": app.config['ALLOWED_ORIGINS']}})
   db.init_app(app) # This needs to come before Marshmallow
   BaseModel.set_session(db.session)
   migrate = Migrate(app, db)
