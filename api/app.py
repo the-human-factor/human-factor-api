@@ -89,6 +89,10 @@ def create_app(name=__name__):
       db.session.rollback()
       raise
 
+  @app.route('/debug-sentry')
+  def trigger_error():
+    division_by_zero = 1 / 0
+
   return app
 
 def config_logging(app):
