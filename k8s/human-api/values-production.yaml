@@ -15,7 +15,7 @@ replicaCount: 2
 
 image:
   repository: gcr.io/the-human-factor/human-api
-  tag: production
+  tag: master
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

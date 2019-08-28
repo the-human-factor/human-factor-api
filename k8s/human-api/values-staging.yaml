@@ -15,7 +15,7 @@ replicaCount: 1
 
 image:
   repository: gcr.io/the-human-factor/human-api
-  tag: staging
+  tag: master
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
