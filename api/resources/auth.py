@@ -22,7 +22,7 @@ class UserRegister(Resource):
   def post(self):
     try:
       json = request.get_json()
-      full_name = json.get('full_name')
+      full_name = json.get('fullName')
       email = json.get('email')
       password = json.get('password')
     except (KeyError, AttributeError) as e:
