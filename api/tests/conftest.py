@@ -32,7 +32,7 @@ def session(app, request):
 
 @pytest.fixture(scope='function')
 def user():
-  return f.UserFactory(password='hunter2').save()
+  return f.UserFactory(email='test-user@example.com', password='hunter2').save()
 
 @pytest.fixture(scope='function')
 def access_token(user):
