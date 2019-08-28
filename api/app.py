@@ -41,9 +41,8 @@ def create_app(name=__name__):
     release=f"human-factor-api@{app.config['SENTRY_RELEASE_ID']}"
   )
 
-  app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
+  app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:*REDACTED*@{}/{}".format(
     app.config['DB_USER'],
-    app.config['DB_PASSWORD'],
     app.config['DB_HOST'],
     app.config['DB_NAME'])
 
