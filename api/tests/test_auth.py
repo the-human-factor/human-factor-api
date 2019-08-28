@@ -50,3 +50,23 @@ def test_refresh_token_missing(client, refresh_token):
   resp = client.post(url_for('userrefresh'))
 
   assert resp.status_code == 401
+
+def test_change_password_success(client, access_token):
+  resp = client.put(url_for('userpassword'),
+                    json=dict(
+                      oldPassword='hunter2',
+                      password='Test123123'),
+                    headers={'Authorization': f"Bearer {access_token}"})
+
+  assert resp.status_code == 200
+  assert resp.json['access_token'] != None
+  assert resp.json['refresh_token'] != None
+
+def test_change_password_failure(client, access_token):
+  resp = client.put(url_for('userpassword'),
+                    json=dict(
+                      oldPassword='hunter3', # wrong pass
+                      password='Test123123'),
+                    headers={'Authorization': f"Bearer {access_token}"})
+
+  assert resp.status_code == 400

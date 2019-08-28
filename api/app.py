@@ -28,18 +28,9 @@ def create_app(name=__name__):
   import api.routes as routes
   import api.resources as resources
 
-  logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.INFO) # TODO make level configurable
-
-  structlog.configure(
-    processors=[
-      structlog.processors.KeyValueRenderer(key_order=["event", "request_id"]),
-    ],
-    context_class=structlog.threadlocal.wrap_dict(dict),
-    logger_factory=structlog.stdlib.LoggerFactory()
-  )
-
   app = Flask(name)
   FlaskDynaconf(app) # Initialize config
+  config_logging(app)
 
   app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
     app.config['DB_USER'],
@@ -90,3 +81,17 @@ def create_app(name=__name__):
       raise
 
   return app
+
+def config_logging(app):
+  logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.INFO) # TODO make level configurable
+
+  processors = [structlog.processors.KeyValueRenderer(key_order=["event", "request_id"])]
+
+  if app.config['ENV'] == 'development':
+    processors.append(structlog.processors.ExceptionPrettyPrinter())
+
+  structlog.configure(
+    processors=processors,
+    context_class=structlog.threadlocal.wrap_dict(dict),
+    logger_factory=structlog.stdlib.LoggerFactory()
+  )

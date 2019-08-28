@@ -1,3 +1,4 @@
+import structlog
 from datetime import datetime
 
 from flask import request, abort, current_app
@@ -9,11 +10,13 @@ import api.schemas as s
 
 from flask_jwt_extended import (
   JWTManager,
+  jwt_required,
   get_raw_jwt,
   get_jwt_identity,
   jwt_refresh_token_required)
 
 jwt = JWTManager()
+logger = structlog.get_logger()
 
 class UserRegister(Resource):
   def post(self):
@@ -23,7 +26,7 @@ class UserRegister(Resource):
       email = json.get('email')
       password = json.get('password')
     except (KeyError, AttributeError) as e:
-      print("Request missing values")
+      logger.error("Request missing values", e)
       abort(400)
 
     user = m.User.query.filter_by(email=email).one_or_none()
@@ -44,6 +47,31 @@ class UserRegister(Resource):
         'user': s.UserSchema().jsonify(user).json
     }, 201
 
+class UserPassword(Resource):
+  @jwt_required
+  def put(self):
+    try:
+      json = request.get_json()
+      old_password = json.get('oldPassword')
+      new_password = json.get('password')
+    except (KeyError, AttributeError) as e:
+      log.error("Request missing values")
+      abort(400)
+
+    user = m.User.query.get(get_jwt_identity())
+
+    if not user.check_password(old_password):
+      return {
+        'error': 'IncorrectPassword',
+        'message': 'Incorrect password supplied when changing passwords'
+      }, 400
+
+    user.update(password=new_password)
+
+    return {
+      'access_token': user.create_access_token_with_claims(),
+      'refresh_token': user.create_refresh_token()
+    }, 200
 
 class UserLogin(Resource):
   def post(self):
