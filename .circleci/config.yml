@@ -46,6 +46,19 @@ jobs:
     executor: gcp
     steps:
       - run:
+          name: Install Sentry CLI
+          command: npm install @sentry/cli
+
+      - run:
+          name: Create Sentry release
+          command: |
+            # Create token at https://sentry.io/settings/the-human-factor/projects/human-factor-api/release-tracking/
+            export VERSION=$(./node_modules/.bin/sentry-cli releases propose-version)
+
+            # Create a release
+            ./node_modules/.bin/sentry-cli releases new -p human-factor-api $VERSION
+
+      - run:
           name: Auth with GCP
           command: |
             echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
@@ -58,6 +71,14 @@ jobs:
           command: |
             kubectl config set-context --current --namespace=staging
             kubectl set image deployment staging-human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
+      - run:
+          name: Finalize Sentry release
+          command: |
+            # Associate commits with the release
+            ./node_modules/.bin/sentry-cli releases set-commits --auto $VERSION
+
+            # Finalize release
+            ./node_modules/.bin/sentry-cli releases finalize $VERSION
 
 workflows:
   version: 2
