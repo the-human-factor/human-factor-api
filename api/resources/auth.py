@@ -55,7 +55,7 @@ class UserPassword(Resource):
       old_password = json['oldPassword']
       new_password = json['password']
     except (KeyError, AttributeError) as e:
-      print("Request missing values")
+      logger.error("Request missing values", exc=e)
       abort(400)
 
     user = m.User.query.get(get_jwt_identity())
@@ -70,7 +70,8 @@ class UserPassword(Resource):
 
     return {
       'access_token': user.create_access_token_with_claims(),
-      'refresh_token': user.create_refresh_token()
+      'refresh_token': user.create_refresh_token(),
+      'user': s.UserSchema().jsonify(user).json
     }, 200
 
 class UserLogin(Resource):
@@ -80,7 +81,7 @@ class UserLogin(Resource):
       username = json['email']
       password = json['password']
     except (KeyError, AttributeError) as e:
-      print("Request missing values")
+      logger.error("Request missing values", exc=e)
       abort(400)
 
     user = m.User.query.filter_by(email=username).first()
