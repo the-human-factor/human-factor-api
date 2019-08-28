@@ -26,7 +26,7 @@ class UserRegister(Resource):
       email = json['email']
       password = json['password']
     except (KeyError, AttributeError) as e:
-      logger.error(event="Request missing values")
+      print("Request missing values")
       abort(400)
 
     user = m.User.query.filter_by(email=email).one_or_none()
@@ -55,7 +55,7 @@ class UserPassword(Resource):
       old_password = json['oldPassword']
       new_password = json['password']
     except (KeyError, AttributeError) as e:
-      log.error("Request missing values")
+      print("Request missing values")
       abort(400)
 
     user = m.User.query.get(get_jwt_identity())
