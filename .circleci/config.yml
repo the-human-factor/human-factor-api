@@ -44,7 +44,9 @@ jobs:
 
   deploy-staging:
     executor: gcp
+    working_directory: ~/repo
     steps:
+      - checkout
       - run:
           name: Install Sentry CLI
           command: |
