@@ -13,8 +13,10 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-
 from sqlalchemy_mixins import AllFeaturesMixin
+
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -31,6 +33,12 @@ def create_app(name=__name__):
   app = Flask(name)
   FlaskDynaconf(app) # Initialize config
   config_logging(app)
+
+  sentry_sdk.init(
+    'https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502',
+    integrations=[FlaskIntegration(transaction_style="url")],
+    environment=app.config['ENV']
+  )
 
   app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
     app.config['DB_USER'],
