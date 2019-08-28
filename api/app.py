@@ -37,7 +37,8 @@ def create_app(name=__name__):
   sentry_sdk.init(
     'https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502',
     integrations=[FlaskIntegration(transaction_style="url")],
-    environment=app.config['ENV']
+    environment=app.config['ENV'],
+    release=f"human-factor-api@{app.config['SENTRY_RELEASE_ID']}"
   )
 
   app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(

@@ -38,6 +38,7 @@ jobs:
       - run:
           name: Build, tag and push Docker image
           command: |
+            sed -i 's/{{RELEASE_ID}}/$(git rev-parse HEAD)/g' settings.toml
             docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} .
             docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')
             docker push gcr.io/the-human-factor/human-api

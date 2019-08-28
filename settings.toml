@@ -11,16 +11,20 @@ JWT_BLACKLIST_ENABLED="True"
 JWT_BLACKLIST_TOKEN_CHECKS="refresh"
 PROPAGATE_EXCEPTIONS="True"
 ALLOWED_ORIGINS="*"
+SENTRY_RELEASE_ID="local"
 
 [development]
 DB_HOST="db"
 
 [testing]
+SENTRY_RELEASE_ID="{{RELEASE_ID}}"
 
 [staging]
 DB_HOST="human-api-db-postgresql.staging.svc.cluster.local"
 VIDEO_BUCKET="staging.videos.thehumanfactor.ai"
 ALLOWED_ORIGINS="*"
+SENTRY_RELEASE_ID="{{RELEASE_ID}}"
 
 [production]
 VIDEO_BUCKET="prod.videos.thehumanfactor.ai"
+SENTRY_RELEASE_ID="{{RELEASE_ID}}"
