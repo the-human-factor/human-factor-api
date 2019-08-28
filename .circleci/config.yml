@@ -47,7 +47,10 @@ jobs:
     steps:
       - run:
           name: Install Sentry CLI
-          command: npm install @sentry/cli
+          command: |
+            curl -sL https://deb.nodesource.com/setup_12.x | bash -
+            apt-get install -y nodejs
+            npm install @sentry/cli
 
       - run:
           name: Create Sentry release
