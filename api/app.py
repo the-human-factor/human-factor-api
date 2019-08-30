@@ -69,6 +69,10 @@ def create_app(name=__name__):
   def healthcheck():
     return 'ok'
 
+  @app.route('/version')
+  def healthcheck():
+    return app.config['SENTRY_RELEASE_ID']
+
   @app.shell_context_processor
   def make_shell_context():
     """
