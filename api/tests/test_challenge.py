@@ -16,7 +16,7 @@ def test_create_challenge(client, access_token):
 def test_get_challenge(client, access_token):
   challenge = f.ChallengeFactory.create().save()
 
-  resp = client.get(url_for('challenge', challengeId=challenge.id),
+  resp = client.get(url_for('challenge', challenge_id=challenge.id),
                     headers={'Authorization': f"Bearer {access_token}"})
 
   assert resp.status_code == 200
