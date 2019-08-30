@@ -38,7 +38,7 @@ def create_app(name=__name__):
     app.config['SENTRY_DSN'],
     integrations=[FlaskIntegration(transaction_style="url")],
     environment=app.config['ENV'],
-    release=f"human-factor-api@{app.config['SENTRY_RELEASE_ID']}"
+    release=f"human-factor-api@{app.config['GIT_COMMIT_SHA']}"
   )
 
   app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
@@ -76,8 +76,8 @@ def create_app(name=__name__):
     return 'ok'
 
   @app.route('/version')
-  def healthcheck():
-    return app.config['SENTRY_RELEASE_ID']
+  def version():
+    return app.config['GIT_COMMIT_SHA']
 
   @app.shell_context_processor
   def make_shell_context():
@@ -93,6 +93,7 @@ def create_app(name=__name__):
 
   @app.after_request
   def session_commit(res):
+    res.headers["X-HF-git-commit-sha"] = app.config['GIT_COMMIT_SHA']
     if res.status_code >= 400:
       return res
     try:
