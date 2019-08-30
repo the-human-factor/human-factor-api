@@ -7,8 +7,8 @@ import api.tests.factories as f
 def test_create_response(client, access_token, response):
   resp = client.post(url_for('createresponse'),
                      data=dict(
-                       challenge_id=response.challenge.id,
-                       video_blob=(io.BytesIO(b'fake video data'),'video.webm')),
+                     challengeId=response.challenge.id,
+                     videoBlob=(io.BytesIO(b'fake video data'),'video.webm')),
                      headers={'Authorization': f"Bearer {access_token}"})
 
   assert resp.status_code == 201
@@ -16,8 +16,8 @@ def test_create_response(client, access_token, response):
 def test_create_response_invalid_challenge(client, access_token):
   resp = client.post(url_for('createresponse'),
                      data=dict(
-                       challenge_id=uuid.uuid4(),
-                       video_blob=(io.BytesIO(b'fake video data'),'video.webm')),
+                     challengeId=uuid.uuid4(),
+                     videoBlob=(io.BytesIO(b'fake video data'),'video.webm')),
                      headers={'Authorization': f"Bearer {access_token}"})
 
   assert resp.status_code == 404
