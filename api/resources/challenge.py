@@ -22,8 +22,8 @@ class CreateChallenge(Resource):
     try:
       title = request.form['title']
       instructions = request.form['instructions']
-      grading_notes = request.form['grading_notes']
-      video_blob = request.files['video_blob']
+      grading_notes = request.form['gradingNotes']
+      video_blob = request.files['videoBlob']
     except (KeyError, AttributeError) as e:
       print("Request missing values")
       abort(400)

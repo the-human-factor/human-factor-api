@@ -27,8 +27,8 @@ class CreateResponse(Resource):
     user = m.User.query.get(get_jwt_identity())
 
     try:
-      challenge_id = request.form['challenge_id']
-      video_blob = request.files['video_blob']
+      challenge_id = request.form['challengeId']
+      video_blob = request.files['videoBlob']
     except (KeyError, AttributeError) as e:
       print("Request missing values")
       abort(400)
