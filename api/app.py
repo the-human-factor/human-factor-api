@@ -52,7 +52,13 @@ def create_app(name=__name__):
     app.config['DB_HOST'],
     app.config['DB_NAME']))
 
-  cors = CORS(app, resources={r"*": {"origins": app.config['ALLOWED_ORIGINS']}})
+  cors = CORS(app, resources={
+    r"/healthcheck": { "origins": "*"},
+    r"/version": { "origins": "*"},
+    r"/api/*": {
+      "origins": app.config['ALLOWED_ORIGINS']
+      }
+    })
   db.init_app(app) # This needs to come before Marshmallow
   BaseModel.set_session(db.session)
   migrate = Migrate(app, db)
