@@ -23,6 +23,8 @@ jobs:
       - run:
           name: Start container and verify it is working
           command: |
+            git rev-parse --short HEAD
+            git rev-parse HEAD 
             set -x
             docker-compose -f docker-compose.circle.yaml up -d
             docker-compose exec api pipenv run flask db upgrade
