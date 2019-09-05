@@ -13,7 +13,8 @@ from sqlalchemy.orm import backref
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 
-from api.app import db, bcrypt, BaseModel
+from api.app import db, bcrypt, BaseModel, media_dirs
+from api.ffmpeg import FFMPEG
 
 class Video(BaseModel):
   __tablename__ = 'videos'
@@ -28,11 +29,32 @@ class Video(BaseModel):
   @staticmethod
   def create_and_upload(file):
     video = Video.create()
+    name_prefix = str(video.id)
+
+    output_video_name = name_prefix + ".mp4"
+    output_image_name = name_prefix + ".jpg"
+    output_thumbnail_name = "{}_thumb.jpg".format(name_prefix)
+
+    upload_path = FFMPEG.saveUploadToTemp(file, name_prefix)
+    output_video_path = FFMPEG.encodeMP4(upload_path, output_video_name)
+    video_stats = FFMPEG.info(output_video_path)
+
+
+    output_image_path = FFMPEG.captureStill(output_video_path,
+                                            output_image_name,
+                                            video_stats["duration"] / 1.8)
+
+    print(video_stats)
+    print(output_video_path)
+    print(output_image_path)
+
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(current_app.config['VIDEO_BUCKET'])
-    blob = bucket.blob("{}.webm".format(video.id))
+    blob = bucket.blob(name_prefix + ".mp4")
 
-    blob.upload_from_file(file.stream, predefined_acl="publicRead")
+    blob.upload_from_filename(output_video_path,
+                              content_type="video/mp4",
+                              predefined_acl="publicRead")
 
     video.update(url=blob.public_url)
 

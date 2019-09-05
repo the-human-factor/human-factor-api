@@ -12,6 +12,7 @@ JWT_BLACKLIST_TOKEN_CHECKS="refresh"
 PROPAGATE_EXCEPTIONS="True"
 ALLOWED_ORIGINS="*"
 GIT_COMMIT_SHA="local"
+TEMP_MEDIA_DIR="/tmp/media"
 
 [development]
 DB_HOST="db"

@@ -2,7 +2,7 @@
 FROM debian:10.0 AS dev-env
 
 RUN apt-get update -y && \
-    apt-get install -y python3-dev python3-pip postgresql-client libpq-dev && \
+    apt-get install -y python3-dev python3-pip postgresql-client libpq-dev ffmpeg && \
     update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 1 && \
     update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3 1 && \
     rm -rf /var/lib/apt/lists/*
@@ -30,7 +30,7 @@ COPY . /app
 FROM debian:10.0 AS prod-env
 
 RUN apt-get update -y && \
-    apt-get install -y python3-dev python3-pip postgresql-client libpq-dev && \
+    apt-get install -y python3-dev python3-pip postgresql-client libpq-dev ffmpeg && \
     update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 1 && \
     update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3 1 && \
     rm -rf /var/lib/apt/lists/*
