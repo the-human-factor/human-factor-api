@@ -35,6 +35,11 @@ def create_app(name=__name__):
   FlaskDynaconf(app) # Initialize config
   config_logging(app)
 
+  temp_dir = app.config["TEMP_MEDIA_DIR"]
+  media_dirs["upload_video_dir"] = initTempDir(temp_dir, "upload_video")
+  media_dirs["output_video_dir"] = initTempDir(temp_dir, "output_video")
+  media_dirs["output_image_dir"] = initTempDir(temp_dir, "output_image")
+
   sentry_sdk.init(
     app.config['SENTRY_DSN'],
     integrations=[FlaskIntegration(transaction_style="url")],
