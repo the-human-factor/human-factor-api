@@ -54,6 +54,7 @@ def create_app(name=__name__):
     app.config['DB_NAME']))
 
   cors = CORS(app, resources={
+<<<<<<< HEAD
     r"/healthcheck": { "origins": "*"},
     r"/version": { "origins": "*"},
     r"/api/*": {
@@ -61,6 +62,11 @@ def create_app(name=__name__):
       }
     })
 
+=======
+    r"/api/*": { "origins": app.config['ALLOWED_ORIGINS'] }
+  })
+  
+>>>>>>> remove unneeded cors
   db.init_app(app) # This needs to come before Marshmallow
   BaseModel.set_session(db.session)
   migrate = Migrate(app, db)
@@ -121,4 +127,3 @@ def config_logging(app):
     context_class=structlog.threadlocal.wrap_dict(dict),
     logger_factory=structlog.stdlib.LoggerFactory()
   )
-
