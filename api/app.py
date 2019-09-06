@@ -18,7 +18,6 @@ from sqlalchemy_mixins import AllFeaturesMixin
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
-
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 logger = structlog.get_logger()
@@ -54,19 +53,9 @@ def create_app(name=__name__):
     app.config['DB_NAME']))
 
   cors = CORS(app, resources={
-<<<<<<< HEAD
-    r"/healthcheck": { "origins": "*"},
-    r"/version": { "origins": "*"},
-    r"/api/*": {
-      "origins": app.config['ALLOWED_ORIGINS']
-      }
-    })
-
-=======
     r"/api/*": { "origins": app.config['ALLOWED_ORIGINS'] }
   })
-  
->>>>>>> remove unneeded cors
+
   db.init_app(app) # This needs to come before Marshmallow
   BaseModel.set_session(db.session)
   migrate = Migrate(app, db)
