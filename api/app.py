@@ -6,13 +6,13 @@ import logging
 import structlog
 
 from dynaconf import FlaskDynaconf
-from sqlalchemy.exc import DatabaseError
 from flask import Flask, request
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy_mixins import AllFeaturesMixin
 
 import sentry_sdk
@@ -22,7 +22,6 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 logger = structlog.get_logger()
-media_dirs = {}
 
 class BaseModel(db.Model, AllFeaturesMixin):
   __abstract__ = True
@@ -35,11 +34,6 @@ def create_app(name=__name__):
   app = Flask(name)
   FlaskDynaconf(app) # Initialize config
   config_logging(app)
-
-  temp_dir = app.config["TEMP_MEDIA_DIR"]
-  media_dirs["upload_video_dir"] = initTempDir(temp_dir, "upload_video")
-  media_dirs["output_video_dir"] = initTempDir(temp_dir, "output_video")
-  media_dirs["output_image_dir"] = initTempDir(temp_dir, "output_image")
 
   sentry_sdk.init(
     app.config['SENTRY_DSN'],
@@ -128,9 +122,3 @@ def config_logging(app):
     logger_factory=structlog.stdlib.LoggerFactory()
   )
 
-def initTempDir(parent, name):
-  directory = os.path.join(parent, name)
-  if os.path.exists(directory):
-    shutil.rmtree(directory)
-  os.makedirs(directory)
-  return directory
