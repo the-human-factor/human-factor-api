@@ -1,4 +1,6 @@
 from datetime import datetime
+import tempfile
+import os
 
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy, Model
@@ -14,8 +16,10 @@ from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 
 from api.app import db, bcrypt, BaseModel
-import api.ffmpeg
+from api import ffmpeg
 from api.utils import get_extension_from_content_type
+
+BUFFER_SIZE = 2**14 # 16KiB
 
 class Video(BaseModel):
   __tablename__ = 'videos'
@@ -45,48 +49,47 @@ class Video(BaseModel):
     extension = get_extension_from_content_type(file)
     source_name = "{}.{}".format(video.id, extension)
 
-    # These cab be used to make the enqued job run quicker.
-    # TODO(Alex): This could be done on upload, something like this:
+    # These can be used later for ingestion to not need a redownload.
+    # TODO(Alex): It could be done on upload, something like this:
     # https://github.com/pallets/werkzeug/issues/1344#issuecomment-440589308
     temp_dir = tempfile.mkdtemp(prefix="upload_video")
     path = os.path.join(temp_dir, source_name)
-    file.save(path, buffer_size=16384) # TODO: make constant
-
-    import pdb; pdb.set_trace() # pdb++  > sticky
-    print("SAVING to {}".format(path))
+    file.save(path, buffer_size=BUFFER_SIZE) # TODO: make constant
 
     storage_client = storage.Client()
-    bucket = storage_client.get_bucket(current_app.config['VIDEO_BUCKET'])
-    blob = bucket.blob(source_name)
+    bucket = storage_client.get_bucket(current_app.config['STATIC_BUCKET'])
+    blob = bucket.blob("source/" + source_name)
 
-    # Does stream still work after saving to disk?
-    # blob.upload_from_filename(output_video_path,
-    blob.upload_from_file(file.stream,
-                          content_type=file.content_type,
-                          predefined_acl="publicRead")
+    # Can use:
+    # blob.upload_from_file(file.stream,
+    # But
+    # If the file is saved, we get: ValueError(u'Stream must be at beginning.')
+    blob.upload_from_filename(path,
+                              content_type=file.content_type,
+                              predefined_acl="publicRead")
 
     video.update(url=blob.public_url, source_url=blob.public_url)
 
-    # TODO: Enque ingestion
-    # ingest_local_source(temp_dir, source_name)
+    # TODO: Enque ingestion: video.ingest_local_source(temp_dir, source_name)
 
     return video
 
   def ingest_source_from_bucket(self):
     storage_client = storage.Client()
-    bucket = storage_client.get_bucket(current_app.config['VIDEO_BUCKET'])
+    bucket = storage_client.get_bucket(current_app.config['STATIC_BUCKET'])
     temp_dir = tempfile.mkdtemp(prefix="media")
     source_name = self.source_url_blob_name
     source_video_path = os.path.join(temp_dir, source_name)
     blob = bucket.blob()
+
     blob.download_to_filename(source_video_path)
 
-    ingest_local_source(temp_dir, source_video_path)
+    self.ingest_local_source(temp_dir, source_video_path)
 
   def ingest_local_source(self, temp_dir, source_video_name):
+    config = current_app.config
     storage_client = storage.Client()
-    video_bucket = storage_client.get_bucket(current_app.config['VIDEO_BUCKET'])
-    image_bucket = storage_client.get_bucket(current_app.config['IMAGE_BUCKET'])
+    bucket = storage_client.get_bucket(config['STATIC_BUCKET'])
 
     reencoded_name = "{}.mp4".format(self.id)
     still_name = "{}.jpg".format(self.id)
@@ -97,19 +100,21 @@ class Video(BaseModel):
     still_path = os.path.join(temp_dir, still_name)
     thumbnail_path = os.path.join(temp_dir, output_thumbnail_name)
 
-    encode_mp4(source_path,
-               reencoded_path,
-               crf=current_app.config['FFMPEG_DEFAULT_CRF'],
-               speed=current_app.config['FFMPEG_DEFAULT_SPEED'])
+    ffmpeg.encode_mp4(source_path,
+                      reencoded_path,
+                      crf=config['FFMPEG_DEFAULT_CRF'],
+                      speed=config['FFMPEG_DEFAULT_SPEED'])
     video_stats = ffmpeg.info(reencoded_path)
     ffmpeg.capture_still(reencoded_path,
                          still_path,
-                         video_stats["duration"] / 1.8)
-    resize_image(still_path, thumbnail_path, width=200)
+                         at_time=video_stats["duration"] / 1.8)
+    ffmpeg.resize_image(still_path,
+                        thumbnail_path,
+                        width=config["STILL_THUMBNAIL_WIDTH"])
 
-    reencoded_blob = video_bucket.blob(reencoded_name)
-    still_blob = image_bucket.blob(still_name)
-    thumbnail_blob = image_bucket.blob(output_thumbnail_name)
+    reencoded_blob = bucket.blob(config["BUCKET_VIDEO_PREFIX"] + reencoded_name)
+    still_blob = bucket.blob(config["BUCKET_STILL_PREFIX"] + still_name)
+    thumbnail_blob = bucket.blob(config["BUCKET_THUMB_PREFIX"] + still_name)
 
     reencoded_blob.upload_from_filename(reencoded_path,
                                         content_type="video/mp4",
@@ -124,11 +129,11 @@ class Video(BaseModel):
                                         predefined_acl="publicRead")
 
     self.update(url=reencoded_blob.public_url,
-                 still_url=still_blob.public_url,
-                 thumbnail_url=thumbnail_blob.public_url,
-                 source_width=video_stats["width"],
-                 source_height=video_stats["height"],
-                 source_duration_sec=video_stats["duration"])
+                still_url=still_blob.public_url,
+                thumbnail_url=thumbnail_blob.public_url,
+                source_width=video_stats["width"],
+                source_height=video_stats["height"],
+                source_duration_sec=video_stats["duration"])
 
 
 class Challenge(BaseModel):

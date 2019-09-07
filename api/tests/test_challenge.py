@@ -2,13 +2,13 @@ import io
 from flask import url_for
 import api.tests.factories as f
 
-def test_create_challenge(client, access_token):
+def test_create_challenge(client, access_token, video_blob):
   resp = client.post(url_for('createchallenge'),
                      data=dict(
                      title='Test Challenge',
                      instructions='Some Instructions',
                      gradingNotes='This is how it is done',
-                     videoBlob=(io.BytesIO(b'fake video data'),'video.webm')),
+                     videoBlob=(video_blob, 'video.webm')),
                      headers={'Authorization': f"Bearer {access_token}"})
 
   assert resp.status_code == 201

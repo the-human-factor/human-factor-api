@@ -1,11 +1,15 @@
-import uuid
+import os
 import pytest
+import shutil
+import uuid
 from unittest.mock import PropertyMock
 
 from api.app import create_app, db
 from api.models import BaseModel
 import api.tests.factories as f
+from werkzeug import FileStorage
 
+TEST_WEBM_PATH = './api/tests/data/test.webm'
 
 @pytest.fixture(scope='session')
 def app(request):
@@ -54,7 +58,21 @@ def challenge():
 def response():
   return f.ResponseFactory.create().save()
 
+@pytest.fixture
+def video_blob():
+  return open(TEST_WEBM_PATH, "rb")
+
+def save_video_into(file_path):
+  shutil.copy(TEST_WEBM_PATH, file_path)
+
+def check_file_exists(file_path, **kwargs):
+  if os.path.getsize(file_path) == 0:
+    raise ValueError("file is empty, {}".format(file_path))
+
 @pytest.fixture(autouse=True)
 def mock_storage(mocker):
   _storage = mocker.patch('api.models.storage')
   type(_storage.Client.return_value.get_bucket.return_value.blob.return_value).public_url = PropertyMock(return_value=str(uuid.uuid4()))
+  _storage.Client().get_bucket().blob().download_to_filename.side_effect = save_video_into
+  _storage.Client().get_bucket().blob().upload_from_filename.side_effect = check_file_exists
+

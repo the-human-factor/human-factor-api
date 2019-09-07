@@ -19,8 +19,8 @@ videos_helper = sa.Table(
   'videos',
   sa.MetaData(),
   sa.Column('id', UUID(as_uuid=True), primary_key=True),
-  sa.Column('url', db.String(512)),
-  sa.Column('source_url', db.String(512))
+  sa.Column('url', sa.String(512)),
+  sa.Column('source_url', sa.String(512))
 )
 
 
@@ -42,7 +42,7 @@ def upgrade():
       videos_helper.update().where(
         videos_helper.c.id == video.id
       ).values(
-        source_url=url
+        source_url=video.url
       )
     )
 

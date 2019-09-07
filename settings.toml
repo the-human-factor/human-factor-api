@@ -5,16 +5,20 @@ DB_PASSWORD=""
 DB_HOST="db"
 DB_NAME="human_factor"
 SQLALCHEMY_TRACK_MODIFICATIONS="False"
-VIDEO_BUCKET="dev.videos.thehumanfactor.ai"
-IMAGE_BUCKET="dev.images.thehumanfactor.ai"
+STATIC_BUCKET="staging.static.thehumanfactor.ai"
+BUCKET_SOURCE_PREFIX="source/"
+BUCKET_VIDEO_PREFIX="video/"
+BUCKET_STILL_PREFIX="still/"
+BUCKET_THUMB_PREFIX="thumb/"
 JWT_SECRET_KEY="fake-secret"
 JWT_BLACKLIST_ENABLED="True"
 JWT_BLACKLIST_TOKEN_CHECKS="refresh"
 PROPAGATE_EXCEPTIONS="True"
 ALLOWED_ORIGINS="*"
 GIT_COMMIT_SHA="local"
-FFMPEG_DEFAULT_CRF="23"
+FFMPEG_DEFAULT_CRF="25" # Matches webm quality from Alex's Chrome
 FFMPEG_DEFAULT_SPEED="slower"
+STILL_THUMBNAIL_WIDTH=200
 
 [development]
 DB_HOST="db"
@@ -25,13 +29,10 @@ SENTRY_DSN="https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502"
 
 [staging]
 DB_HOST="human-api-db-postgresql.staging.svc.cluster.local"
-VIDEO_BUCKET="staging.videos.thehumanfactor.ai"
-IMAGE_BUCKET="staging.images.thehumanfactor.ai"
 GIT_COMMIT_SHA="{{GIT_COMMIT_SHA}}"
 SENTRY_DSN="https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502"
 
 [production]
-VIDEO_BUCKET="prod.videos.thehumanfactor.ai"
-IMAGE_BUCKET="prod.images.thehumanfactor.ai"
+STATIC_BUCKET="production.static.thehumanfactor.ai"
 GIT_COMMIT_SHA="{{GIT_COMMIT_SHA}}"
 SENTRY_DSN="https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502"

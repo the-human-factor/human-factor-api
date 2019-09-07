@@ -13,11 +13,11 @@ def test_create_response(client, access_token, response):
 
   assert resp.status_code == 201
 
-def test_create_response_invalid_challenge(client, access_token):
+def test_create_response_invalid_challenge(client, access_token, video_blob):
   resp = client.post(url_for('createresponse'),
                      data=dict(
                      challengeId=uuid.uuid4(),
-                     videoBlob=(io.BytesIO(b'fake video data'),'video.webm')),
+                     videoBlob=(video_blob,'video.webm')),
                      headers={'Authorization': f"Bearer {access_token}"})
 
   assert resp.status_code == 404
