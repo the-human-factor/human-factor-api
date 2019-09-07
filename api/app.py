@@ -6,13 +6,13 @@ import logging
 import structlog
 
 from dynaconf import FlaskDynaconf
-from sqlalchemy.exc import DatabaseError
 from flask import Flask, request
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy_mixins import AllFeaturesMixin
 
 import sentry_sdk
@@ -55,7 +55,7 @@ def create_app(name=__name__):
   cors = CORS(app, resources={
     r"/api/*": { "origins": app.config['ALLOWED_ORIGINS'] }
   })
-  
+
   db.init_app(app) # This needs to come before Marshmallow
   BaseModel.set_session(db.session)
   migrate = Migrate(app, db)

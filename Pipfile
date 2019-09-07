@@ -33,6 +33,8 @@ sqlalchemy-mixins = "*"
 flask-shell-ipython = "*"
 structlog = "*"
 sentry-sdk = {extras = ["flask"],version = "*"}
+celery = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.7"
