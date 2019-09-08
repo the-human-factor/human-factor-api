@@ -12,6 +12,7 @@ mock = "*"
 pytest-mock = "*"
 pdbpp = "*"
 pytest-testmon = "*"
+pygments = "*"
 
 [packages]
 flask-sqlalchemy = "*"

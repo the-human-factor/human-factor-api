@@ -28,5 +28,6 @@ services:
       - "9000:9000"
     volumes:
         - ./:/app
+        - ${PWD}/.pdbrc.py:/home/human/.pdbrc.py
     depends_on:
       - db
