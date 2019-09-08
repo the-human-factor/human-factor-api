@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e531a0fe5d3704c890cf0bea9d4b2ada16649bf66e92b0025c1d27589c0c84bb"
+            "sha256": "7710acd282e3479a198ff0784302cf3fd583e0a257e7e7068fd1c57642415676"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -277,10 +277,10 @@
         },
         "google-resumable-media": {
             "hashes": [
-                "sha256:49493999cf046b5a02f648e201f0c2fc718c5969c53326b4d2c0693b01bdc8bb",
-                "sha256:ceff1b34d5bfff9d671b0ed598a0eeac175d9f6e1bc37709955ace424f63e156"
+                "sha256:46ee131e55d16e350cf9dc7de6fc0653b55314e8645e2deb0633394adcd7e9c0",
+                "sha256:d14dff24e0c6cab676f9eff0049c42b8cdae78dff723be095ef3af2c4ba06dfa"
             ],
-            "version": "==0.3.3"
+            "version": "==0.4.0"
         },
         "googleapis-common-protos": {
             "hashes": [
@@ -401,11 +401,11 @@
         },
         "marshmallow-sqlalchemy": {
             "hashes": [
-                "sha256:2bf8159f0360c2655d6bd5ec793c87319c5bcad7af91cc8e973c221ba263746a",
-                "sha256:d4323a29928f6b575001a0161eb00f3166a5c662dbd4cf2724d5966fc9395250"
+                "sha256:b53ae45f6f113ae5433211786129ecb6eaf3646a3a333e769eeb22593b6dbe9c",
+                "sha256:c4dd561ff42f39e44619e6558a28da7154fea62ffada6815403f1381762c87db"
             ],
             "index": "pypi",
-            "version": "==0.17.2"
+            "version": "==0.19.0"
         },
         "more-itertools": {
             "hashes": [
