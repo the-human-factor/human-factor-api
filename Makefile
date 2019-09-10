@@ -16,7 +16,7 @@ test:
 .PHONY: test-dev
 ## Runs the tests
 test-dev:
-	docker-compose exec api pipenv run ptw
+	docker-compose exec api pipenv run ptw -- --testmon
 
 .PHONY: psql
 ## Creates a postgres shell in the `db` container
