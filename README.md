@@ -1,5 +1,6 @@
 # Human Factor
 
+[![CircleCI](https://circleci.com/gh/the-human-factor/human-factor-api/tree/master.svg?style=svg&circle-token=4b99181a5781d38ac02b3f0668f9156b532643e0)](https://circleci.com/gh/the-human-factor/human-factor-api/tree/master)
 
 ## Quickstart
 
