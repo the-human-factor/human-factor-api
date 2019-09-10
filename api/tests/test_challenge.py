@@ -1,6 +1,7 @@
 import io
 from flask import url_for
 import api.tests.factories as f
+import api.models as m
 
 def test_create_challenge(client, access_token, video_blob):
   resp = client.post(url_for('createchallenge'),
@@ -23,6 +24,7 @@ def test_get_challenge(client, access_token):
   assert resp.json['id'] == str(challenge.id)
 
 def test_list_challenges(client, session, access_token):
+  original_count = m.Challenge.query.count()
   challenges = f.ChallengeFactory.create_batch(size=10)
   session.add_all(challenges)
   session.commit()
@@ -31,4 +33,4 @@ def test_list_challenges(client, session, access_token):
                     headers={'Authorization': f"Bearer {access_token}"})
 
   assert resp.status_code == 200
-  assert len(resp.json) == 10
+  assert len(resp.json) - original_count == 10
