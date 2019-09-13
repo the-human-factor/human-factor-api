@@ -9,6 +9,10 @@ postgresql:
     postgresql:
       existingSecret: production-postgresql
 
+redis:
+  image:
+    tag: 5.0-debian-9
+  existingSecret: human-api-redis-secret
 
 environment: production
 replicaCount: 2
