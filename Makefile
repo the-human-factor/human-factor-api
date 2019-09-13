@@ -8,20 +8,30 @@ console:
 shell:
 	docker-compose exec api bash
 
+.PHONY: rq
+## Creates a shell in the `rq-worker` container
+rq:
+	docker-compose exec api bash
+
 .PHONY: test
 ## Runs the tests
 test:
-	docker-compose exec api pipenv run pytest
+	docker-compose exec api bash -c "FLASK_ENV=testing ENV_FOR_DYNACONF=testing pipenv run pytest"
 
 .PHONY: test-dev
 ## Runs the tests
 test-dev:
-	docker-compose exec api pipenv run ptw -- --testmon
+	docker-compose exec api bash -c "FLASK_ENV=testing ENV_FOR_DYNACONF=testing pipenv run ptw -- --testmon"
 
 .PHONY: psql
 ## Creates a postgres shell in the `db` container
 psql:
 	docker-compose exec db psql -U postgres human_factor
+
+.PHONY: redis-cli
+## Creates a redis cli
+redis-cli:
+	docker run --link api_redis_1:redis --net api_default -it airdock/redis-client
 
 .PHONY: migrate
 ## Flask db upgrade to the latest version of the schema

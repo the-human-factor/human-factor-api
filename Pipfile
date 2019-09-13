@@ -13,6 +13,8 @@ pytest-mock = "*"
 pdbpp = "*"
 pytest-testmon = "*"
 pygments = "*"
+fakeredis = "*"
+pytest-structlog = "*"
 
 [packages]
 flask-sqlalchemy = "*"
@@ -34,8 +36,9 @@ sqlalchemy-mixins = "*"
 flask-shell-ipython = "*"
 structlog = "*"
 sentry-sdk = {extras = ["flask"],version = "*"}
-celery = "*"
 pillow = "*"
+flask-rq2 = "*"
+rq-dashboard = "*"
 
 [requires]
 python_version = "3.7"

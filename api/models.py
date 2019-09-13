@@ -35,13 +35,14 @@ class Video(BaseModel):
   source_height = db.Column(db.Integer())
   source_duration_sec = db.Column(db.Float())
 
+  encoded_at = db.Column(db.DateTime(timezone=True), nullable=True)
   created_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
   updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=datetime.utcnow, nullable=False)
 
   @property
   def source_url_blob_name(self):
     return self.url.split("/")[-1]
-  
+
   @staticmethod
   def create_and_upload(file):
     video = Video.create()
@@ -133,7 +134,8 @@ class Video(BaseModel):
                 thumbnail_url=thumbnail_blob.public_url,
                 source_width=video_stats["width"],
                 source_height=video_stats["height"],
-                source_duration_sec=video_stats["duration"])
+                source_duration_sec=video_stats["duration"],
+                encoded_at=datetime.utcnow())
 
 
 class Challenge(BaseModel):

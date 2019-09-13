@@ -9,11 +9,13 @@ from dynaconf import FlaskDynaconf
 from flask import Flask, request
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
+from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy_mixins import AllFeaturesMixin
+
+import rq_dashboard
 
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -29,6 +31,7 @@ class BaseModel(db.Model, AllFeaturesMixin):
 def create_app(name=__name__):
   import api.routes as routes
   import api.resources as resources
+  from api.jobs import rq
 
   app = Flask(name)
   FlaskDynaconf(app) # Initialize config
@@ -63,6 +66,9 @@ def create_app(name=__name__):
   routes.api.init_app(app)
   resources.jwt.init_app(app)
   bcrypt.init_app(app)
+  rq.init_app(app)
+
+  app.register_blueprint(rq_dashboard.blueprint, url_prefix='/admin/jobs')
 
   @app.before_request
   def set_request_id():
@@ -100,9 +106,12 @@ def create_app(name=__name__):
       db.session.rollback()
       raise
 
-  @app.route('/debug-sentry')
-  def trigger_error():
-    division_by_zero = 1 / 0
+  @app.route('/test-job')
+  def test_job():
+    from api.jobs import ingest_video
+    job = ingest_video.queue("world")
+    print(job)
+    return 'ok', 201
 
   return app
 

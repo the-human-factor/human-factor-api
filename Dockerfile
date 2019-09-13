@@ -1,8 +1,23 @@
+# Build stage
+FROM debian:10.0 AS build-env
+RUN apt-get update -y && \
+    apt-get install -y wget build-essential unzip
+
+WORKDIR /tmp
+
+RUN wget https://bitbucket.org/eradman/entr/get/33816756113b.zip && \
+    unzip 33816756113b.zip && \
+    cd eradman-entr-33816756113b && \
+    wget http://entrproject.org/patches/entr-3.9-wsl && \
+    patch -p1 < entr-3.9-wsl && \
+    ./configure && \
+    make
+
 # Dev stage
 FROM debian:10.0 AS dev-env
 
 RUN apt-get update -y && \
-    apt-get install -y python3-dev python3-pip postgresql-client libpq-dev ffmpeg && \
+    apt-get install -y python3-dev python3-pip postgresql-client libpq-dev ffmpeg ack && \
     update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 1 && \
     update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3 1 && \
     rm -rf /var/lib/apt/lists/*
@@ -14,6 +29,7 @@ USER human
 
 ENV PATH="/home/human/.local/bin:${PATH}"
 
+COPY --from=build-env /tmp/eradman-entr-33816756113b/entr /usr/local/bin/
 COPY ./Pipfile* /app/
 
 ENV LC_ALL C.UTF-8

@@ -1,5 +1,6 @@
 secrets/
 .testmondata
+.tmontmp/
 
 # Mac
 .DS_Store

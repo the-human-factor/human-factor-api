@@ -75,4 +75,3 @@ def mock_storage(mocker):
   type(_storage.Client.return_value.get_bucket.return_value.blob.return_value).public_url = PropertyMock(return_value=str(uuid.uuid4()))
   _storage.Client().get_bucket().blob().download_to_filename.side_effect = save_video_into
   _storage.Client().get_bucket().blob().upload_from_filename.side_effect = check_file_exists
-
