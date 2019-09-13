@@ -19,13 +19,19 @@ GIT_COMMIT_SHA="local"
 FFMPEG_DEFAULT_CRF="25" # Matches webm quality from Alex's Chrome
 FFMPEG_DEFAULT_SPEED="slower"
 STILL_THUMBNAIL_WIDTH=200
+ENCODING_TASK_TIMEOUT=600
 
 [development]
 DB_HOST="db"
+RQ_REDIS_URL="redis://redis:6379/0"
+RQ_DASHBOARD_REDIS_URL="redis://redis:6379/0"
 
 [testing]
 GIT_COMMIT_SHA="test"
-SENTRY_DSN="https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502"
+ASYNC_JOBS='False'
+RQ_REDIS_URL="redis://redis:6379/0"
+RQ_DASHBOARD_REDIS_URL="redis://redis:6379/0"
+RQ_CONNECTION_CLASS = 'fakeredis.FakeStrictRedis'
 
 [staging]
 DB_HOST="human-api-db-postgresql.staging.svc.cluster.local"
