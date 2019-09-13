@@ -23,3 +23,20 @@ services:
       - "9000:9000"
     depends_on:
       - db
+  rq-worker:
+    build:
+      context: .
+      target: dev-env
+    command: sh -c 'ack -f | entr -r pipenv run flask rq worker'
+    tty: true
+    stdin_open: true
+    environment:
+      FLASK_ENV: development
+      ENV_FOR_DYNACONF: development
+      POSTGRES_USER: postgres
+      FLASK_JWT_SECRET_KEY: 27a74d58e693489beb79b626300618f6d241443b3d4ed228d7bd15d67a6ad9fe
+    depends_on:
+      - db
+      - redis
+  redis:
+    image: redis:5.0-buster
