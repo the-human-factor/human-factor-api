@@ -24,10 +24,10 @@ jobs:
           name: Start container and verify it is working
           command: |
             set -x
-            docker-compose build --parallel 
+            docker-compose build --parallel
             docker-compose -f docker-compose.circle.yaml up -d
             docker-compose exec api pipenv run flask db upgrade
-            docker-compose exec api pipenv run pytest
+            docker-compose exec api bash -c "FLASK_ENV=testing ENV_FOR_DYNACONF=testing pipenv run pytest"
 
       - run:
           name: Auth with GCP
