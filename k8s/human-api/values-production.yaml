@@ -16,6 +16,7 @@ redis:
 
 environment: production
 replicaCount: 2
+workerCount: 3
 
 image:
   repository: gcr.io/the-human-factor/human-api
