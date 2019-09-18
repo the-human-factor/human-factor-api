@@ -19,6 +19,7 @@ import rq_dashboard
 
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -39,7 +40,7 @@ def create_app(name=__name__):
 
   sentry_sdk.init(
     app.config['SENTRY_DSN'],
-    integrations=[FlaskIntegration(transaction_style="url")],
+    integrations=[FlaskIntegration(transaction_style="url"), SqlalchemyIntegration()],
     environment=app.config['ENV'],
     release=f"human-factor-api@{app.config['GIT_COMMIT_SHA']}"
   )
