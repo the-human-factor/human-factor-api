@@ -42,7 +42,7 @@ jobs:
           command: |
             sed -i "s/{{GIT_COMMIT_SHA}}/$(git rev-parse HEAD)/g" settings.toml
             docker build --target prod-env -t gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} .
-            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:$(git rev-parse --abbrev-ref HEAD | sed 's/\//-/g')
+            docker tag gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} gcr.io/the-human-factor/human-api:$(git rev-parse --abbrev-ref HEAD | sed 's/\//__/g')
             docker push gcr.io/the-human-factor/human-api
 
   deploy-staging:
