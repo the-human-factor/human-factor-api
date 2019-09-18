@@ -18,6 +18,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from api.app import db, bcrypt, BaseModel
 from api import ffmpeg
 from api.utils import get_extension_from_content_type
+from api.jobs import ingest_video
 
 BUFFER_SIZE = 2**14 # 16KiB
 
@@ -71,7 +72,8 @@ class Video(BaseModel):
 
     video.update(url=blob.public_url, source_url=blob.public_url)
 
-    # TODO: Enque ingestion: video.ingest_local_source(temp_dir, source_name)
+    # Enqueue
+    ingest_video(video.id)
 
     return video
 

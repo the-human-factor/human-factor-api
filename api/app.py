@@ -60,7 +60,7 @@ def create_app(name=__name__):
   bcrypt.init_app(app)
   rq.init_app(app)
 
-  app.register_blueprint(rq_dashboard.blueprint, url_prefix='/admin/jobs')
+  app.register_blueprint(rq_dashboard.blueprint, url_prefix='/api/admin/jobs')
 
   @app.before_request
   def set_request_id():
@@ -146,7 +146,7 @@ def config_redis(app, rq):
   app.config['RQ_DASHBOARD_REDIS_URL'] = app.config['RQ_REDIS_URL']
   rq.redis_url = app.config['RQ_REDIS_URL']
 
-  app.logger.info('App configured to talke to Redis: %s', "redis://*REDACTED*@{}:{}/{}".format(
+  app.logger.info('App configured to talk to Redis: %s', "redis://*REDACTED*@{}:{}/{}".format(
     app.config['REDIS_HOST'],
     app.config['REDIS_PORT'],
     app.config['REDIS_DB']))
