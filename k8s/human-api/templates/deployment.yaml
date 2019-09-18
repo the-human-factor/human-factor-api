@@ -48,7 +48,75 @@ spec:
                 secretKeyRef:
                   name: {{ template "human-api.name" . }}-jwt-secret
                   key: secret
+            - name: FLASK_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "human-api.name" . }}-redis-secret
+                  key: redis-password
 
+      volumes:
+        - name: credentials
+          secret:
+            secretName: google-credentials
+            items:
+              - key: google-credentials.json
+                path: google-credentials.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "human-api.fullname" . }}-rq-worker
+  labels:
+    app: {{ template "human-api.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.workerCount }}
+  selector:
+    matchLabels:
+      app: {{ template "human-api.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "human-api.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ["pipenv"]
+          args: ["run", "flask", "rq", "worker"]
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: credentials
+              mountPath: "/credentials"
+              readOnly: true
+          env:
+            - name: FLASK_ENV
+              value: {{ .Values.environment }}
+            - name: ENV_FOR_DYNACONF
+              value: {{ .Values.environment }}
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /credentials/google-credentials.json
+            - name: FLASK_DB_HOST
+              value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
+            - name: FLASK_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.global.postgresql.existingSecret }}
+                  key: postgresql-password
+            - name: FLASK_JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "human-api.name" . }}-jwt-secret
+                  key: secret
+            - name: FLASK_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "human-api.name" . }}-redis-secret
+                  key: redis-password
       volumes:
         - name: credentials
           secret:

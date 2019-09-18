@@ -43,24 +43,9 @@ def create_app(name=__name__):
   app = Flask(name)
   FlaskDynaconf(app) # Initialize config
   config_logging(app)
-
-  sentry_sdk.init(
-    app.config['SENTRY_DSN'],
-    integrations=[FlaskIntegration(transaction_style="url"), SqlalchemyIntegration()],
-    environment=app.config['ENV'],
-    release=f"human-factor-api@{app.config['GIT_COMMIT_SHA']}"
-  )
-
-  app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
-    app.config['DB_USER'],
-    app.config['DB_PASSWORD'],
-    app.config['DB_HOST'],
-    app.config['DB_NAME'])
-
-  app.logger.info('App configured to talk to DB: %s', "postgresql://{}:*REDACTED*@{}/{}".format(
-    app.config['DB_USER'],
-    app.config['DB_HOST'],
-    app.config['DB_NAME']))
+  config_sentry(app)
+  config_db(app)
+  config_redis(app, rq)
 
   cors = CORS(app, resources={
     r"/api/*": { "origins": app.config['ALLOWED_ORIGINS'] }
@@ -115,8 +100,8 @@ def create_app(name=__name__):
 
   @app.route('/test-job')
   def test_job():
-    from api.jobs import ingest_video
-    job = ingest_video.queue("world")
+    from api.jobs import rq, test_job
+    job = test_job.queue(2, 3)
     print(job)
     return 'ok', 201
 
@@ -131,4 +116,45 @@ def config_logging(app):
     processors=processors,
     context_class=structlog.threadlocal.wrap_dict(dict),
     logger_factory=structlog.stdlib.LoggerFactory()
+  )
+
+def config_db(app):
+  app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
+    app.config['DB_USER'],
+    app.config['DB_PASSWORD'],
+    app.config['DB_HOST'],
+    app.config['DB_NAME'])
+
+  app.logger.info('App configured to talk to DB: %s', "postgresql://{}:*REDACTED*@{}/{}".format(
+    app.config['DB_USER'],
+    app.config['DB_HOST'],
+    app.config['DB_NAME']))
+
+def config_redis(app, rq):
+  if app.config['REDIS_PASSWORD']:
+    app.config['RQ_REDIS_URL'] = "redis://:{}@{}:{}/{}".format(
+      app.config['REDIS_PASSWORD'],
+      app.config['REDIS_HOST'],
+      app.config['REDIS_PORT'],
+      app.config['REDIS_DB'])
+  else:
+    app.config['RQ_REDIS_URL'] = "redis://{}:{}/{}".format(
+      app.config['REDIS_HOST'],
+      app.config['REDIS_PORT'],
+      app.config['REDIS_DB'])
+
+  app.config['RQ_DASHBOARD_REDIS_URL'] = app.config['RQ_REDIS_URL']
+  rq.redis_url = app.config['RQ_REDIS_URL']
+
+  app.logger.info('App configured to talke to Redis: %s', "redis://*REDACTED*@{}:{}/{}".format(
+    app.config['REDIS_HOST'],
+    app.config['REDIS_PORT'],
+    app.config['REDIS_DB']))
+
+def config_sentry(app):
+  sentry_sdk.init(
+    app.config['SENTRY_DSN'],
+    integrations=[FlaskIntegration(transaction_style="url")],
+    environment=app.config['ENV'],
+    release=f"human-factor-api@{app.config['GIT_COMMIT_SHA']}"
   )

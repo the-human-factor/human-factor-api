@@ -4,41 +4,43 @@ DB_USER="postgres"
 DB_PASSWORD=""
 DB_HOST="db"
 DB_NAME="human_factor"
-SQLALCHEMY_TRACK_MODIFICATIONS="False"
+SQLALCHEMY_TRACK_MODIFICATIONS=false
 STATIC_BUCKET="staging.static.thehumanfactor.ai"
 BUCKET_SOURCE_PREFIX="source/"
 BUCKET_VIDEO_PREFIX="video/"
 BUCKET_STILL_PREFIX="still/"
 BUCKET_THUMB_PREFIX="thumb/"
 JWT_SECRET_KEY="fake-secret"
-JWT_BLACKLIST_ENABLED="True"
+JWT_BLACKLIST_ENABLED=true
 JWT_BLACKLIST_TOKEN_CHECKS="refresh"
-PROPAGATE_EXCEPTIONS="True"
+PROPAGATE_EXCEPTIONS=true
 ALLOWED_ORIGINS="*"
 GIT_COMMIT_SHA="local"
 FFMPEG_DEFAULT_CRF="25" # Matches webm quality from Alex's Chrome
 FFMPEG_DEFAULT_SPEED="slower"
 STILL_THUMBNAIL_WIDTH=200
 ENCODING_TASK_TIMEOUT=600
+REDIS_PORT=6379
+REDIS_DB=0
 
 [development]
 DB_HOST="db"
-RQ_REDIS_URL="redis://redis:6379/0"
-RQ_DASHBOARD_REDIS_URL="redis://redis:6379/0"
+REDIS_HOST="redis"
 
 [testing]
 GIT_COMMIT_SHA="test"
-ASYNC_JOBS='False'
-RQ_REDIS_URL="redis://redis:6379/0"
-RQ_DASHBOARD_REDIS_URL="redis://redis:6379/0"
+RQ_ASYNC=false
+REDIS_HOST="redis"
 RQ_CONNECTION_CLASS = 'fakeredis.FakeStrictRedis'
 
 [staging]
 DB_HOST="human-api-db-postgresql.staging.svc.cluster.local"
 GIT_COMMIT_SHA="{{GIT_COMMIT_SHA}}"
 SENTRY_DSN="https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502"
+REDIS_HOST="staging-redis-master.staging.svc.cluster.local"
 
 [production]
 STATIC_BUCKET="production.static.thehumanfactor.ai"
 GIT_COMMIT_SHA="{{GIT_COMMIT_SHA}}"
 SENTRY_DSN="https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502"
+REDIS_HOST="production-redis-master.production.svc.cluster.local"

@@ -16,6 +16,7 @@ redis:
 
 environment: staging
 replicaCount: 1
+workerCount: 1
 
 image:
   repository: gcr.io/the-human-factor/human-api
