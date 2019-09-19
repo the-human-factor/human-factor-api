@@ -51,6 +51,12 @@ def test_wrong_password_login(client, user):
 
   assert resp.status_code == 401
 
+def test_missing_fields_login(client, user):
+  resp = client.post(url_for('userlogin'),
+                     json={})
+
+  assert resp.status_code == 400
+
 def test_refresh_token(client, refresh_token):
   resp = client.post(url_for('userrefresh'),
                        headers={'Authorization': f"Bearer {refresh_token}"})

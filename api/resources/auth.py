@@ -21,7 +21,7 @@ logger = structlog.get_logger()
 class UserRegister(Resource):
   def post(self):
     try:
-      json = request.get_json()
+      json = request.get_json(force=True)
       full_name = json['fullName']
       email = json['email']
       password = json['password']
@@ -51,7 +51,7 @@ class UserPassword(Resource):
   @jwt_required
   def put(self):
     try:
-      json = request.get_json()
+      json = request.get_json(force=True)
       old_password = json['oldPassword']
       new_password = json['password']
     except (KeyError, AttributeError) as e:
@@ -77,7 +77,7 @@ class UserPassword(Resource):
 class UserLogin(Resource):
   def post(self):
     try:
-      json = request.get_json()
+      json = request.get_json(force=True)
       username = json['email']
       password = json['password']
     except (KeyError, AttributeError) as e:

@@ -19,6 +19,7 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
   full_name = factory.Faker('name')
   email = factory.Faker('email')
   password = factory.Faker('password')
+  role = factory.LazyAttribute(lambda a: m.Role.of("user").id)
 
 
 class ChallengeFactory(factory.alchemy.SQLAlchemyModelFactory):
