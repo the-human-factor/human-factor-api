@@ -29,9 +29,7 @@ REDIS_HOST="redis"
 
 [testing]
 GIT_COMMIT_SHA="test"
-RQ_ASYNC=false
 REDIS_HOST="redis"
-RQ_CONNECTION_CLASS = 'fakeredis.FakeStrictRedis'
 
 [staging]
 DB_HOST="human-api-db-postgresql.staging.svc.cluster.local"

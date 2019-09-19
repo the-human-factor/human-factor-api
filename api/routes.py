@@ -1,6 +1,7 @@
 from flask_restful import Api
 
 import api.resources as resources
+import api.admin.resources as admin
 
 api = Api()
 
@@ -20,3 +21,5 @@ api.add_resource(resources.UserLogin, '/api/auth/login')
 api.add_resource(resources.UserLogout, '/api/auth/logout')
 api.add_resource(resources.UserRefresh, '/api/auth/refresh')
 api.add_resource(resources.UserPassword, '/api/auth/password')
+
+api.add_resource(admin.video.VideoEncodeAll, '/api/admin/videos/encode')
