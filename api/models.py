@@ -155,6 +155,19 @@ class Challenge(BaseModel):
   updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=datetime.utcnow, nullable=False)
 
 
+class Role(BaseModel):
+  __tablename__ = 'roles'
+
+  id = db.Column(db.String(255), primary_key=True)
+
+  def __repr__(self):
+    return f"<Role {self.id}>"
+
+  @staticmethod
+  def of(id):
+    return Role.where(id=id).one_or_none()
+
+
 class User(BaseModel):
   __tablename__ = 'users'
 
@@ -162,6 +175,8 @@ class User(BaseModel):
   full_name = db.Column(db.Unicode(255), nullable=False)
   email = db.Column(db.String(255), unique=True, nullable=False)
   _password = db.Column('password', db.String(255), nullable=False)
+
+  role = db.Column(db.String(255), db.ForeignKey('roles.id', name='fk_user_role'), default="user", nullable=False)
 
   created_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), nullable=False)
   updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=datetime.utcnow, nullable=False)
@@ -178,12 +193,27 @@ class User(BaseModel):
     return bcrypt.check_password_hash(self.password, password)
 
   def create_access_token_with_claims(self):
-    # TODO: Implement claims
-    claims = {'roles': [{'admin': 'admin'},]}
+    claims = {'role': self.role }
     return create_access_token(identity=self.id, user_claims=claims)
 
   def create_refresh_token(self):
     return create_refresh_token(identity=self.id)
+
+  @staticmethod
+  def get_or_create_super_admin():
+    user = User.where(email="super_admin@thehumanfactor.ai").one_or_none()
+    if not user:
+      user = User.create(
+        full_name="Super Admin",
+        email="super_admin@thehumanfactor.ai",
+        password="iamsuperspecialforsure",
+        role=Role.of("super_admin"))
+
+    return user
+
+  def __repr__(self):
+    return f"<User {self.email}>"
+
 
 class BlacklistedToken(BaseModel):
   __tablename__ = 'blacklisted_tokens'
