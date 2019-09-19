@@ -19,6 +19,11 @@ spec:
         app: {{ template "human-api.name" . }}
         release: {{ .Release.Name }}
     spec:
+      initContainers:
+        - name: {{ .Chart.Name }}-migrate-db
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ["pipenv"]
+          args: ["run", "flask", "db", "upgrade"]
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
