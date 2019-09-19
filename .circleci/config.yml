@@ -78,6 +78,7 @@ jobs:
           command: |
             kubectl config set-context --current --namespace=staging
             kubectl set image deployment staging-human-api-deployment human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
+            kubectl set image deployment staging-human-api-rq-worker human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
       - run:
           name: Finalize Sentry release
           command: |
