@@ -60,12 +60,8 @@ class Video(BaseModel):
 
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(current_app.config['STATIC_BUCKET'])
-    blob = bucket.blob("source/" + source_name)
+    blob = bucket.blob(current_app.config["BUCKET_SOURCE_PREFIX"] + source_name)
 
-    # Can use:
-    # blob.upload_from_file(file.stream,
-    # But
-    # If the file is saved, we get: ValueError(u'Stream must be at beginning.')
     blob.upload_from_filename(path,
                               content_type=file.content_type,
                               predefined_acl="publicRead")
@@ -73,7 +69,7 @@ class Video(BaseModel):
     video.update(url=blob.public_url, source_url=blob.public_url)
 
     # Enqueue
-    ingest_video(video.id)
+    ingest_video.queue(video.id)
 
     return video
 
@@ -83,7 +79,7 @@ class Video(BaseModel):
     temp_dir = tempfile.mkdtemp(prefix="media")
     source_name = self.source_url_blob_name
     source_video_path = os.path.join(temp_dir, source_name)
-    blob = bucket.blob()
+    blob = bucket.blob(current_app.config["BUCKET_SOURCE_PREFIX"] + source_name)
 
     blob.download_to_filename(source_video_path)
 
