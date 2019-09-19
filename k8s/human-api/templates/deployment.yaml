@@ -20,10 +20,21 @@ spec:
         release: {{ .Release.Name }}
     spec:
       initContainers:
-        - name: {{ .Chart.Name }}-migrate-db
+        - name: migrate-db
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: ["pipenv"]
-          args: ["run", "flask", "db", "upgrade"]
+          command: ["pipenv", "run", "flask", "db", "upgrade"]
+          env:
+            - name: FLASK_ENV
+              value: {{ .Values.environment }}
+            - name: ENV_FOR_DYNACONF
+              value: {{ .Values.environment }}
+            - name: FLASK_DB_HOST
+              value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
+            - name: FLASK_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.global.postgresql.existingSecret }}
+                  key: postgresql-password
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
