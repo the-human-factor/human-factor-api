@@ -1,7 +1,10 @@
 import os
 import subprocess
+import structlog
 import functools
 from PIL import Image
+
+log = structlog.get_logger()
 
 
 @functools.lru_cache(maxsize=None)
@@ -28,13 +31,13 @@ def info(input_path):
 #
 # FFMPEF H.264 settings:
 # https://trac.ffmpeg.org/wiki/Encode/H.264
-def encode_mp4(input_path, output_path, crf="23", speed="slower"):
+def encode_mp4(input_path, output_path, crf="17", speed="slower"):
   """Encodes a source input video into a mp4 with h264 encoding.
   Raises:
     subprocess.CalledProcessError: When the ffmpeg command fails.
   """
   args = [
-    "ffmpeg",
+    "/usr/local/bin/ffmpeg",
     "-hide_banner",
     "-y",
     "-i",
@@ -45,16 +48,15 @@ def encode_mp4(input_path, output_path, crf="23", speed="slower"):
     crf,
     "-preset",
     speed,
-    "-pix_fmt",
-    "yuv420p",  # "Encoding for dumb players"
-    "-profile:v",
-    "high",
-    "-level",
-    "4.0",  # Compatibility flags
+    "-vsync",
+    "2",  # http://ffmpeg.org/pipermail/ffmpeg-user/2018-May/039926.html
     "-movflags",
     "+faststart",
     output_path,
   ]
+
+  log.info("Running ffmpeg with options", args=args)
+
   subprocess.check_call(args)
 
 
