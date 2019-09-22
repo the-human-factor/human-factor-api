@@ -31,6 +31,8 @@ def admin_required(fn):
     verify_jwt_in_request()
     claims = get_jwt_claims()
     if claims["role"] in set(["super_admin", "admin"]):
+      return fn(*args, **kwargs)
+    else:
       return (
         jsonify(
           {
@@ -40,8 +42,6 @@ def admin_required(fn):
         ),
         403,
       )
-    else:
-      return fn(*args, **kwargs)
 
   return wrapper
 
@@ -52,6 +52,8 @@ def user_required(fn):
     verify_jwt_in_request()
     claims = get_jwt_claims()
     if claims["role"] in set(["super_admin", "admin", "user"]):
+      return fn(*args, **kwargs)
+    else:
       return (
         jsonify(
           {
@@ -61,7 +63,5 @@ def user_required(fn):
         ),
         403,
       )
-    else:
-      return fn(*args, **kwargs)
 
   return wrapper

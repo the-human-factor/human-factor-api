@@ -35,8 +35,20 @@ def session(app, request):
   return db.session
 
 @pytest.fixture(scope='function')
+def super_admin():
+  return f.UserFactory(email='super_admin@example.com', password='hunter2', role='super_admin').save()
+
+@pytest.fixture(scope='function')
+def admin():
+  return f.UserFactory(email='admin@example.com', password='hunter2', role='admin').save()
+
+@pytest.fixture(scope='function')
 def user():
-  return f.UserFactory(email='test-user@example.com', password='hunter2').save()
+  return f.UserFactory(email='test-user@example.com', password='hunter2', role='user').save()
+
+@pytest.fixture(scope='function')
+def end_user():
+  return f.UserFactory(email='test-end-user@example.com', password='hunter2', role='end_user').save()
 
 @pytest.fixture(scope='function')
 def access_token(user):
