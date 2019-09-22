@@ -1,6 +1,8 @@
-from datetime import datetime
 import tempfile
 import os
+
+from datetime import datetime, timedelta
+from dynaconf import settings
 
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy, Model
@@ -154,6 +156,7 @@ class Video(BaseModel):
 
 class Challenge(BaseModel):
   __tablename__ = "challenges"
+  __table_args__ = (db.Index("challenges_by_user_id_listed", "user_id", "listed"),)
 
   id = db.Column(
     UUID(as_uuid=True),
@@ -164,7 +167,7 @@ class Challenge(BaseModel):
   title = db.Column(db.Unicode(length=255), nullable=False)
   instructions = db.Column(db.UnicodeText, nullable=False)
   grading_notes = db.Column(db.UnicodeText, nullable=False)
-  listed = db.Column(db.Boolean, default=False, nullable=False)
+  listed = db.Column(db.Boolean, default=False, nullable=False, index=True)
 
   user = db.relationship("User", backref="challenges")
   user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"))
@@ -236,9 +239,15 @@ class User(BaseModel):
   def check_password(self, password):
     return bcrypt.check_password_hash(self.password, password)
 
-  def create_access_token_with_claims(self):
+  def create_access_token_with_claims(
+    self, expires_minutes=settings["JWT_EXPIRATION_MINUTES"]
+  ):
     claims = {"role": self.role}
-    return create_access_token(identity=self.id, user_claims=claims)
+    return create_access_token(
+      identity=self.id,
+      user_claims=claims,
+      expires_delta=timedelta(minutes=expires_minutes),
+    )
 
   def create_refresh_token(self):
     return create_refresh_token(identity=self.id)
