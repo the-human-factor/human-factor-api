@@ -6,7 +6,7 @@ import api.models as models
 class VideoSchema(ModelSchema):
   class Meta:
     model = models.Video
-    exclude = ('response', 'challenges')
+    exclude = ("response", "challenges")
 
 
 class UserSchema(ModelSchema):
@@ -30,7 +30,7 @@ class ResponseSchema(ModelSchema):
   class ChallengeWithoutResponses(ChallengeSchema):
     class Meta:
       model = models.Challenge
-      exclude = ["responses"] # Prevent circular serialization
+      exclude = ["responses"]  # Prevent circular serialization
 
   challenge = fields.Nested(ChallengeWithoutResponses)
   video = fields.Nested(VideoSchema)

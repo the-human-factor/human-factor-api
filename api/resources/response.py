@@ -14,6 +14,7 @@ class Response(Resource):
 
     return s.ResponseSchema().jsonify(response).json, 200
 
+
 class ResponseList(Resource):
   @jwt_required
   def get(self):
@@ -27,8 +28,8 @@ class CreateResponse(Resource):
     user = m.User.query.get(get_jwt_identity())
 
     try:
-      challenge_id = request.form['challengeId']
-      video_blob = request.files['videoBlob']
+      challenge_id = request.form["challengeId"]
+      video_blob = request.files["videoBlob"]
     except (KeyError, AttributeError) as e:
       print("Request missing values")
       abort(400)
@@ -36,9 +37,6 @@ class CreateResponse(Resource):
     video = m.Video().create_and_upload(video_blob)
     challenge = m.Challenge.query.get_or_404(challenge_id)
 
-    response = m.Response.create(
-      challenge=challenge,
-      user=user,
-      video=video)
+    response = m.Response.create(challenge=challenge, user=user, video=video)
 
     return s.ResponseSchema().jsonify(response).json, 201

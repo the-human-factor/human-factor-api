@@ -22,18 +22,22 @@ import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
+
 class SQLAlchemy(_BaseSQLAlchemy):
   def apply_pool_defaults(self, app, options):
     super(SQLAlchemy, self).apply_pool_defaults(app, options)
     options["pool_pre_ping"] = True
 
+
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 logger = structlog.get_logger()
 
+
 class BaseModel(db.Model, AllFeaturesMixin):
   __abstract__ = True
   pass
+
 
 def create_app(name=__name__):
   import api.routes as routes
@@ -41,17 +45,15 @@ def create_app(name=__name__):
   from api.jobs import rq
 
   app = Flask(name)
-  FlaskDynaconf(app) # Initialize config
+  FlaskDynaconf(app)  # Initialize config
   config_logging(app)
   config_sentry(app)
   config_db(app)
   config_redis(app, rq)
 
-  cors = CORS(app, resources={
-    r"/api/*": { "origins": app.config['ALLOWED_ORIGINS'] }
-  })
+  cors = CORS(app, resources={r"/api/*": {"origins": app.config["ALLOWED_ORIGINS"]}})
 
-  db.init_app(app) # This needs to come before Marshmallow
+  db.init_app(app)  # This needs to come before Marshmallow
   BaseModel.set_session(db.session)
   migrate = Migrate(app, db)
   ma = Marshmallow(app)
@@ -60,19 +62,19 @@ def create_app(name=__name__):
   bcrypt.init_app(app)
   rq.init_app(app)
 
-  app.register_blueprint(rq_dashboard.blueprint, url_prefix='/api/admin/jobs')
+  app.register_blueprint(rq_dashboard.blueprint, url_prefix="/api/admin/jobs")
 
   @app.before_request
   def set_request_id():
     logger.new(request_id=str(uuid.uuid4()))
 
-  @app.route('/healthcheck')
+  @app.route("/healthcheck")
   def healthcheck():
-    return 'ok'
+    return "ok"
 
-  @app.route('/version')
+  @app.route("/version")
   def version():
-    return app.config['GIT_COMMIT_SHA']
+    return app.config["GIT_COMMIT_SHA"]
 
   @app.shell_context_processor
   def make_shell_context():
@@ -81,14 +83,16 @@ def create_app(name=__name__):
      """
     from api.utils import module_classes_as_dict
 
-    return {'db': db,
-            **module_classes_as_dict('api.models'),
-            **module_classes_as_dict('api.schemas'),
-            **module_classes_as_dict('api.tests.factories')}
+    return {
+      "db": db,
+      **module_classes_as_dict("api.models"),
+      **module_classes_as_dict("api.schemas"),
+      **module_classes_as_dict("api.tests.factories"),
+    }
 
   @app.after_request
   def session_commit(res):
-    res.headers["X-HF-git-commit-sha"] = app.config['GIT_COMMIT_SHA']
+    res.headers["X-HF-git-commit-sha"] = app.config["GIT_COMMIT_SHA"]
     if res.status_code >= 400:
       return res
     try:
@@ -98,63 +102,77 @@ def create_app(name=__name__):
       db.session.rollback()
       raise
 
-  @app.route('/test-job')
+  @app.route("/test-job")
   def test_job():
     from api.jobs import rq, test_job
+
     job = test_job.queue(2, 3)
     print(job)
-    return 'ok', 201
+    return "ok", 201
 
   return app
 
-def config_logging(app):
-  logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.INFO) # TODO make level configurable
 
-  processors = [structlog.processors.KeyValueRenderer(key_order=["event", "request_id"])]
+def config_logging(app):
+  logging.basicConfig(
+    format="%(message)s", stream=sys.stdout, level=logging.INFO
+  )  # TODO make level configurable
+
+  processors = [
+    structlog.processors.KeyValueRenderer(key_order=["event", "request_id"])
+  ]
 
   structlog.configure(
     processors=processors,
     context_class=structlog.threadlocal.wrap_dict(dict),
-    logger_factory=structlog.stdlib.LoggerFactory()
+    logger_factory=structlog.stdlib.LoggerFactory(),
   )
 
-def config_db(app):
-  app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://{}:{}@{}/{}".format(
-    app.config['DB_USER'],
-    app.config['DB_PASSWORD'],
-    app.config['DB_HOST'],
-    app.config['DB_NAME'])
 
-  app.logger.info('App configured to talk to DB: %s', "postgresql://{}:*REDACTED*@{}/{}".format(
-    app.config['DB_USER'],
-    app.config['DB_HOST'],
-    app.config['DB_NAME']))
+def config_db(app):
+  app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://{}:{}@{}/{}".format(
+    app.config["DB_USER"],
+    app.config["DB_PASSWORD"],
+    app.config["DB_HOST"],
+    app.config["DB_NAME"],
+  )
+
+  app.logger.info(
+    "App configured to talk to DB: %s",
+    "postgresql://{}:*REDACTED*@{}/{}".format(
+      app.config["DB_USER"], app.config["DB_HOST"], app.config["DB_NAME"]
+    ),
+  )
+
 
 def config_redis(app, rq):
-  if app.config['REDIS_PASSWORD']:
-    app.config['RQ_REDIS_URL'] = "redis://:{}@{}:{}/{}".format(
-      app.config['REDIS_PASSWORD'],
-      app.config['REDIS_HOST'],
-      app.config['REDIS_PORT'],
-      app.config['REDIS_DB'])
+  if app.config["REDIS_PASSWORD"]:
+    app.config["RQ_REDIS_URL"] = "redis://:{}@{}:{}/{}".format(
+      app.config["REDIS_PASSWORD"],
+      app.config["REDIS_HOST"],
+      app.config["REDIS_PORT"],
+      app.config["REDIS_DB"],
+    )
   else:
-    app.config['RQ_REDIS_URL'] = "redis://{}:{}/{}".format(
-      app.config['REDIS_HOST'],
-      app.config['REDIS_PORT'],
-      app.config['REDIS_DB'])
+    app.config["RQ_REDIS_URL"] = "redis://{}:{}/{}".format(
+      app.config["REDIS_HOST"], app.config["REDIS_PORT"], app.config["REDIS_DB"]
+    )
 
-  app.config['RQ_DASHBOARD_REDIS_URL'] = app.config['RQ_REDIS_URL']
-  rq.redis_url = app.config['RQ_REDIS_URL']
+  app.config["RQ_DASHBOARD_REDIS_URL"] = app.config["RQ_REDIS_URL"]
+  rq.redis_url = app.config["RQ_REDIS_URL"]
 
-  app.logger.info('App configured to talk to Redis: %s', "redis://*REDACTED*@{}:{}/{}".format(
-    app.config['REDIS_HOST'],
-    app.config['REDIS_PORT'],
-    app.config['REDIS_DB']))
+  app.logger.info(
+    "App configured to talk to Redis: %s",
+    "redis://*REDACTED*@{}:{}/{}".format(
+      app.config["REDIS_HOST"], app.config["REDIS_PORT"], app.config["REDIS_DB"]
+    ),
+  )
+
 
 def config_sentry(app):
   sentry_sdk.init(
-    app.config['SENTRY_DSN'],
+    app.config["SENTRY_DSN"],
     integrations=[FlaskIntegration(transaction_style="url")],
-    environment=app.config['ENV'],
-    release=f"human-factor-api@{app.config['GIT_COMMIT_SHA']}"
+    environment=app.config["ENV"],
+    release=f"human-factor-api@{app.config['GIT_COMMIT_SHA']}",
   )
