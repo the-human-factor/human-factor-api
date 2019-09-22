@@ -164,6 +164,7 @@ class Challenge(BaseModel):
   title = db.Column(db.Unicode(length=255), nullable=False)
   instructions = db.Column(db.UnicodeText, nullable=False)
   grading_notes = db.Column(db.UnicodeText, nullable=False)
+  listed = db.Column(db.Boolean, default=False, nullable=False)
 
   user = db.relationship("User", backref="challenges")
   user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"))
