@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 
 import api.models as m
 import api.schemas as s
+from api.auth import is_admin
 
 
 class Response(Resource):
@@ -18,7 +19,12 @@ class Response(Resource):
 class ResponseList(Resource):
   @jwt_required
   def get(self):
-    responses = m.Response.all()
+    if is_admin():
+      responses = m.Response.all()
+    else:
+      user = m.User.query.get(get_jwt_identity())
+      responses = m.Response.where(user_id=user.id).all()
+
     return s.ResponseSchema(many=True).jsonify(responses).json, 200
 
 
@@ -26,7 +32,6 @@ class CreateResponse(Resource):
   @jwt_required
   def post(self):
     user = m.User.query.get(get_jwt_identity())
-
     try:
       challenge_id = request.form["challengeId"]
       video_blob = request.files["videoBlob"]

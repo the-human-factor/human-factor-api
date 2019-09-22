@@ -16,7 +16,7 @@ read -p "Are you sure you want to deploy [y/n]? " -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    kubectl patch deployment production-human-api-deployment -p '{"spec": {"template": {"spec":{"containers":[{"name":"human-api","image":"gcr.io/the-human-factor/human-api:${NEW_IMAGE}"}], "initContainers":[{"name":"migrate-db","image":"gcr.io/the-human-factor/human-api:${NEW_IMAGE}"}]}}}}'
+    kubectl patch deployment production-human-api-deployment --namespace production -p "{\"spec\": {\"template\": {\"spec\":{\"containers\":[{\"name\":\"human-api\",\"image\": \"${NEW_IMAGE}\"}], \"initContainers\":[{\"name\":\"migrate-db\",\"image\": \"${NEW_IMAGE}\"}]}}}}"
     kubectl set image deployment --namespace production production-human-api-rq-worker      human-api=$NEW_IMAGE --record
     echo "Deployment success!"
     curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"Deployed image ${NEW_IMAGE} to production\"}" https://hooks.slack.com/services/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

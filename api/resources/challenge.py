@@ -10,7 +10,7 @@ from sqlalchemy.orm import joinedload
 import api.models as m
 import api.schemas as s
 
-from api.auth import admin_required
+from api.auth import admin_required, is_admin
 
 log = structlog.get_logger()
 
@@ -70,8 +70,16 @@ class ChallengeList(Resource):
   @jwt_required
   def get(self):
     user = m.User.query.get(get_jwt_identity())
-    challenges = m.Challenge.query.options(
-      joinedload("video"), joinedload("user")
-    ).all()
+    if is_admin():
+      challenges = m.Challenge.query.options(
+        joinedload("video"), joinedload("user")
+      ).all()
+
+    else:
+      challenges = (
+        m.Challenge.where(listed=True)
+        .options(joinedload("video"), joinedload("user"))
+        .all()
+      )
 
     return s.ChallengeSchema(many=True).jsonify(challenges).json, 200

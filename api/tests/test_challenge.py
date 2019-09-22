@@ -35,18 +35,31 @@ def test_get_challenge(client, access_token):
   assert resp.json["id"] == str(challenge.id)
 
 
-def test_list_challenges(client, session, access_token):
+def test_list_challenges(client, session, admin_access_token, access_token):
   original_count = m.Challenge.query.count()
-  challenges = f.ChallengeFactory.create_batch(size=10)
-  session.add_all(challenges)
+  original_listed_count = m.Challenge.where(listed=True).count()
+
+  listed_challenges = [f.ChallengeFactory.create(listed=True) for x in range(10)]
+  unlisted_challenges = [f.ChallengeFactory.create(listed=False) for x in range(20)]
+
+  session.add_all(listed_challenges)
+  session.add_all(unlisted_challenges)
+
   session.commit()
+
+  resp = client.get(
+    url_for("challengelist"), headers={"Authorization": f"Bearer {admin_access_token}"}
+  )
+
+  assert resp.status_code == 200
+  assert len(resp.json) - original_count == 30
 
   resp = client.get(
     url_for("challengelist"), headers={"Authorization": f"Bearer {access_token}"}
   )
 
   assert resp.status_code == 200
-  assert len(resp.json) - original_count == 10
+  assert len(resp.json) - original_listed_count == 10
 
 
 def test_patch_challenge(client, admin_access_token):
