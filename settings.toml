@@ -26,6 +26,7 @@ REDIS_DB=0
 [development]
 DB_HOST="db"
 REDIS_HOST="redis"
+JWT_EXPIRATION_MINUTES=5256000 # 10 years
 
 [testing]
 GIT_COMMIT_SHA="test"

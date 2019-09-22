@@ -8,11 +8,6 @@ import api.models as m
 rq = RQ()
 logger = structlog.get_logger()
 
-@rq.job
-def test_job(x, y):
-  result = x + y
-  print("JOB!!!", result)
-
 @rq.job(timeout=settings.get('ENCODING_TASK_TIMEOUT'))
 def ingest_video(video_id, req_id='00' + str(uuid.uuid4())):
   log = logger.new(request_id=req_id, video_id=video_id)
