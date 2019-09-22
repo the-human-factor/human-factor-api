@@ -77,8 +77,7 @@ jobs:
           name: Deploy to staging namespace
           command: |
             kubectl config set-context --current --namespace=staging
-            kubectl set image deployment staging-human-api-deployment human-api= --record
-            kubectl patch deployment production-human-api-deployment -p "{\"spec\": {\"template\": {\"spec\":{\"containers\":[{\"name\":\"human-api\",\"image\":\"gcr.io/the-human-factor/human-api:${CIRCLE_SHA1}\"}], \"initContainers\":[{\"name\":\"migrate-db\",\"image\":\"gcr.io/the-human-factor/human-api:${CIRCLE_SHA1}\"}]}}}}"
+            kubectl patch deployment production-human-api-deployment -p "{\"spec\": {\"template\": {\"spec\":{\"containers\":[{\"name\":\"human-api\",\"image\":\"gcr.io/the-human-factor/human-api:${CIRCLE_SHA1}\"}], \"initContainers\":[{\"name\":\"migrate-db\",\"image\":\"gcr.io/the-human-factor/human-api:${CIRCLE_SHA1}\"}]}}}}" --record
 
             kubectl set image deployment staging-human-api-rq-worker human-api=gcr.io/the-human-factor/human-api:${CIRCLE_SHA1} --record
       - run:
