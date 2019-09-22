@@ -1,5 +1,9 @@
 import io
+import json
+
+from jsonpatch import JsonPatch
 from flask import url_for
+
 import api.tests.factories as f
 import api.models as m
 
@@ -43,3 +47,25 @@ def test_list_challenges(client, session, access_token):
 
   assert resp.status_code == 200
   assert len(resp.json) - original_count == 10
+
+
+def test_patch_challenge(client, admin_access_token):
+  challenge = f.ChallengeFactory.create(title="Old Title", listed=False).save()
+
+  ops = [
+    {"op": "replace", "path": "/title", "value": "New Title"},
+    {"op": "replace", "path": "/listed", "value": True},
+  ]
+
+  resp = client.put(
+    url_for("challenge", challenge_id=challenge.id),
+    data=json.dumps(ops),
+    headers={
+      "Authorization": f"Bearer {admin_access_token}",
+      "Content-Type": "application/json",
+    },
+  )
+
+  assert resp.status_code == 200
+  assert resp.json["title"] == "New Title"
+  assert resp.json["listed"] == True

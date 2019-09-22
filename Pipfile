@@ -39,6 +39,7 @@ sentry-sdk = {extras = ["flask"],version = "*"}
 pillow = "*"
 flask-rq2 = "*"
 rq-dashboard = "*"
+jsonpatch = "*"
 
 [requires]
 python_version = "3.7"
