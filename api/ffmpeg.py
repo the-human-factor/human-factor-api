@@ -3,23 +3,27 @@ import subprocess
 import functools
 from PIL import Image
 
+
 @functools.lru_cache(maxsize=None)
 def info(input_path):
   args = [
     "ffprobe",
     "-hide_banner",
-    "-v", "error",
-    "-show_entries", "stream=width,height,duration",
-    "-of", "default=noprint_wrappers=1:nokey=1",
-    "-select_streams", "V",
-    input_path
+    "-v",
+    "error",
+    "-show_entries",
+    "stream=width,height,duration",
+    "-of",
+    "default=noprint_wrappers=1:nokey=1",
+    "-select_streams",
+    "V",
+    input_path,
   ]
 
-  out = subprocess.check_output(args) # shell=true will cause the cmd to fail.
+  out = subprocess.check_output(args)  # shell=true will cause the cmd to fail.
   out = out.decode("utf-8").split("\n")
-  return {"width": int(out[0]),
-          "height": int(out[1]),
-          "duration": float(out[2])}
+  return {"width": int(out[0]), "height": int(out[1]), "duration": float(out[2])}
+
 
 #
 # FFMPEF H.264 settings:
@@ -31,29 +35,46 @@ def encode_mp4(input_path, output_path, crf="23", speed="slower"):
   """
   args = [
     "ffmpeg",
-    "-hide_banner", "-y",
-    "-i", input_path,
-    "-c:v", "libx264",
-    "-crf", crf,
-    "-preset", speed,
-    "-pix_fmt", "yuv420p", # "Encoding for dumb players"
-    "-profile:v", "high", "-level", "4.0", # Compatibility flags
-    "-movflags", "+faststart",
-    output_path
+    "-hide_banner",
+    "-y",
+    "-i",
+    input_path,
+    "-c:v",
+    "libx264",
+    "-crf",
+    crf,
+    "-preset",
+    speed,
+    "-pix_fmt",
+    "yuv420p",  # "Encoding for dumb players"
+    "-profile:v",
+    "high",
+    "-level",
+    "4.0",  # Compatibility flags
+    "-movflags",
+    "+faststart",
+    output_path,
   ]
   subprocess.check_call(args)
+
 
 def capture_still(input_path, output_path, at_time=0.0):
   args = [
     "ffmpeg",
-    "-hide_banner", "-y",
-    "-ss", str(at_time), # start time is in seconds
-    "-i", input_path,
-    "-vframes", "1",
-    "-f", "image2",
-    output_path
+    "-hide_banner",
+    "-y",
+    "-ss",
+    str(at_time),  # start time is in seconds
+    "-i",
+    input_path,
+    "-vframes",
+    "1",
+    "-f",
+    "image2",
+    output_path,
   ]
   subprocess.check_call(args)
+
 
 def resize_image(input_path, output_path, width=200):
   with Image.open(input_path) as img:

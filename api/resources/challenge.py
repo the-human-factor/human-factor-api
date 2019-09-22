@@ -14,16 +14,17 @@ class Challenge(Resource):
     challenge = m.Challenge.query.get_or_404(challenge_id)
     return s.ChallengeSchema().jsonify(challenge).json, 200
 
+
 class CreateChallenge(Resource):
   @jwt_required
   def post(self):
     user = m.User.query.get(get_jwt_identity())
 
     try:
-      title = request.form['title']
-      instructions = request.form['instructions']
-      grading_notes = request.form['gradingNotes']
-      video_blob = request.files['videoBlob']
+      title = request.form["title"]
+      instructions = request.form["instructions"]
+      grading_notes = request.form["gradingNotes"]
+      video_blob = request.files["videoBlob"]
     except (KeyError, AttributeError) as e:
       print("Request missing values")
       abort(400)
@@ -35,14 +36,18 @@ class CreateChallenge(Resource):
       instructions=instructions,
       grading_notes=grading_notes,
       user=user,
-      video=video)
+      video=video,
+    )
 
     return s.ChallengeSchema().jsonify(challenge).json, 201
+
 
 class ChallengeList(Resource):
   @jwt_required
   def get(self):
     user = m.User.query.get(get_jwt_identity())
-    challenges = m.Challenge.query.options(joinedload('video'), joinedload('user')).all()
+    challenges = m.Challenge.query.options(
+      joinedload("video"), joinedload("user")
+    ).all()
 
     return s.ChallengeSchema(many=True).jsonify(challenges).json, 200

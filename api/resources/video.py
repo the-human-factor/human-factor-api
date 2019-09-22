@@ -16,10 +16,10 @@ class Video(Resource):
 class CreateVideo(Resource):
   @jwt_required
   def post(self):
-    if 'videoBlob' not in request.files:
+    if "videoBlob" not in request.files:
       print("Request missing values")
       abort(400)
 
-    video_blob = request.files['videoBlob']
+    video_blob = request.files["videoBlob"]
     video = m.Video.create_and_upload(video_blob)
     return s.VideoSchema().jsonify(video).json, 201

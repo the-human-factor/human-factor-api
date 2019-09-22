@@ -10,6 +10,7 @@ from api.auth import super_admin_required
 
 log = structlog.get_logger()
 
+
 class VideoEncodeAll(Resource):
   @super_admin_required
   def post(self):
@@ -17,4 +18,4 @@ class VideoEncodeAll(Resource):
       log.info("Enqueueing for encoding", video_id=video.id)
       ingest_video.queue(video.id)
 
-    return 'ok', 201
+    return "ok", 201
