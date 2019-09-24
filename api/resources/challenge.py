@@ -77,7 +77,9 @@ class ChallengeList(Resource):
 
     else:
       challenges = (
-        m.Challenge.where(listed=True)
+        m.Challenge.query.filter(
+          (m.Challenge.listed == True) | (m.Challenge.user_id == get_jwt_identity())
+        )
         .options(joinedload("video"), joinedload("user"))
         .all()
       )
