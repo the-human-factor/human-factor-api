@@ -249,8 +249,12 @@ class User(BaseModel):
       expires_delta=timedelta(minutes=expires_minutes),
     )
 
-  def create_refresh_token(self):
-    return create_refresh_token(identity=self.id)
+  def create_refresh_token(
+    self, expires_hours=settings["JWT_REFRESH_EXPIRATION_HOURS"]
+  ):
+    return create_refresh_token(
+      identity=self.id, expires_delta=timedelta(hours=expires_hours)
+    )
 
   @staticmethod
   def get_or_create_super_admin():

@@ -22,8 +22,7 @@ class ResponseList(Resource):
     if is_admin():
       responses = m.Response.all()
     else:
-      user = m.User.query.get(get_jwt_identity())
-      responses = m.Response.where(user_id=user.id).all()
+      responses = m.Response.where(user_id=get_jwt_identity()).all()
 
     return s.ResponseSchema(many=True).jsonify(responses).json, 200
 

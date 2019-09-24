@@ -13,7 +13,7 @@ def is_super_admin():
 
 
 def is_admin():
-  return get_role() == "admin"
+  return get_role() == "admin" or is_super_admin()
 
 
 def super_admin_required(fn):
