@@ -19,13 +19,25 @@ class UserSchema(ModelSchema):
     sqla_session = db.session
 
 
+class ResponseWithoutChallenges(ModelSchema):
+  class Meta:
+    model = models.Response
+    exclude = ["challenges"]  # Prevent circular serialization
+    sqla_session = db.session
+    
+  video = fields.Nested(VideoSchema)
+  user = fields.Nested(UserSchema)
+
+
 class ChallengeSchema(ModelSchema):
   class Meta:
     model = models.Challenge
+    exclude = ["responses"]
     sqla_session = db.session
 
   video = fields.Nested(VideoSchema)
   user = fields.Nested(UserSchema)
+  responses = fields.Nested(ResponseWithoutChallenges, many=True)
 
 
 class ResponseSchema(ModelSchema):
