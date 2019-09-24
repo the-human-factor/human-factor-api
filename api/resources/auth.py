@@ -131,6 +131,12 @@ class UserRefresh(Resource):
 class UserLogout(Resource):
   @jwt_refresh_token_required
   def get(self):
+    # TODO: Remove this hacky crap
+    # this makes it so that the YC user can't logout otherwise it would
+    # break the refresh token.
+    if get_jwt_identity() == "589fd51c-0b07-48d3-a050-684ede410d40":
+      return None, 201
+
     token = get_raw_jwt()
     jti = token["jti"]
     exp = token["exp"]
@@ -138,7 +144,7 @@ class UserLogout(Resource):
       jti=jti, exp=datetime.utcfromtimestamp(exp)
     )
 
-    return 201
+    return None, 201
 
 
 @jwt.token_in_blacklist_loader
