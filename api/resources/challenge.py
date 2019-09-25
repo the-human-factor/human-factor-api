@@ -73,7 +73,7 @@ class ChallengeList(Resource):
     if is_admin():
       challenges = m.Challenge.query.options(
         joinedload("video"), joinedload("user")
-      ).all()
+      ).order_by(m.Challenge.listed.desc()).all()
 
     else:
       challenges = (
