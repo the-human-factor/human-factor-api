@@ -16,6 +16,7 @@ spec:
   template:
     metadata:
       labels:
+        type: http
         app: {{ template "human-api.name" . }}
         release: {{ .Release.Name }}
     spec:
@@ -96,6 +97,7 @@ spec:
   template:
     metadata:
       labels:
+        type: worker
         app: {{ template "human-api.name" . }}
         release: {{ .Release.Name }}
     spec:
