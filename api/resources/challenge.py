@@ -6,6 +6,7 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from sqlalchemy.orm import joinedload
+from sqlalchemy.sql import func
 
 import api.models as m
 import api.schemas as s
@@ -37,6 +38,12 @@ class Challenge(Resource):
     schema.load(new_data, instance=challenge).save()
 
     return new_data, 200
+
+  @admin_required
+  def delete(self, challenge_id):
+    challenge = m.Challenge.query.get_or_404(challenge_id)
+    challenge.update(listed=False, deleted_at=func.now())
+    return None, 200
 
 
 class CreateChallenge(Resource):
@@ -71,14 +78,18 @@ class ChallengeList(Resource):
   def get(self):
     user = m.User.query.get(get_jwt_identity())
     if is_admin():
-      challenges = m.Challenge.query.options(
-        joinedload("video"), joinedload("user")
-      ).order_by(m.Challenge.listed.desc()).all()
+      challenges = (
+        m.Challenge.query.filter(m.Challenge.deleted_at.is_(None))
+        .options(joinedload("video"), joinedload("user"))
+        .order_by(m.Challenge.listed.desc())
+        .all()
+      )
 
     else:
       challenges = (
         m.Challenge.query.filter(
-          (m.Challenge.listed == True) | (m.Challenge.user_id == get_jwt_identity())
+          m.Challenge.deleted_at.is_(None) & (m.Challenge.listed == True)
+          | (m.Challenge.user_id == get_jwt_identity())
         )
         .options(joinedload("video"), joinedload("user"))
         .all()
