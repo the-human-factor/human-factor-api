@@ -175,6 +175,7 @@ class Challenge(BaseModel):
   video = db.relationship("Video", backref=backref("challenges", uselist=False))
   video_id = db.Column(UUID(as_uuid=True), db.ForeignKey("videos.id"), nullable=True)
 
+  deleted_at = db.Column(db.DateTime(timezone=True), nullable=True)
   created_at = db.Column(
     db.DateTime(timezone=True), server_default=func.now(), nullable=False
   )
