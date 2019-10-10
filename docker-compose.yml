@@ -32,12 +32,12 @@ services:
         - ${PWD}/.pdbrc.py:/home/human/.pdbrc.py
     depends_on:
       - db
-      - rq-worker
-  rq-worker:
+      - worker
+  worker:
     build:
       context: .
       target: dev-env
-    command: sh -c 'ack -f | entr -r pipenv run flask rq worker'
+    command: sh -c 'ack -f | entr pipenv run celery worker -A api.celery_worker.celery --loglevel=info'
     tty: true
     stdin_open: true
     environment:

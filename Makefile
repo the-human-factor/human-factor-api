@@ -8,10 +8,10 @@ console:
 shell:
 	docker-compose exec api bash
 
-.PHONY: rq
-## Creates a shell in the `rq-worker` container
-rq:
-	docker-compose exec api bash
+.PHONY: worker
+## Creates a shell in the `worker` container
+worker:
+	docker-compose exec worker bash
 
 .PHONY: test
 ## Runs the tests

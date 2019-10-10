@@ -23,11 +23,11 @@ services:
       - "9000:9000"
     depends_on:
       - db
-  rq-worker:
+  worker:
     build:
       context: .
       target: dev-env
-    command: sh -c 'ack -f | entr -r pipenv run flask rq worker'
+    command: sh -c 'ack -f | entr -r pipenv run celery worker -A api.celery_worker.celery --loglevel=info'
     tty: true
     stdin_open: true
     environment:

@@ -82,7 +82,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "human-api.fullname" . }}-rq-worker
+  name: {{ template "human-api.fullname" . }}-worker
   labels:
     app: {{ template "human-api.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -105,7 +105,7 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: ["pipenv"]
-          args: ["run", "flask", "rq", "worker"]
+          args: ["celery", "worker", "-A", "api.celery_worker.celery", "--loglevel=info"]
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
             - name: credentials
