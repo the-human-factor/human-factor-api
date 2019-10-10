@@ -40,6 +40,8 @@ pillow = "*"
 flask-rq2 = "*"
 rq-dashboard = "*"
 jsonpatch = "*"
+ffmpeg-python = "*"
+celery = "*"
 
 [requires]
 python_version = "3.7"

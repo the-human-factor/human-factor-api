@@ -37,7 +37,7 @@ def encode_mp4(input_path, output_path, crf="17", speed="slower"):
     subprocess.CalledProcessError: When the ffmpeg command fails.
   """
   args = [
-    "/usr/local/bin/ffmpeg",
+    "ffmpeg",
     "-hide_banner",
     "-y",
     "-i",
@@ -48,6 +48,8 @@ def encode_mp4(input_path, output_path, crf="17", speed="slower"):
     crf,
     "-preset",
     speed,
+    "-loglevel",
+    "debug",
     "-vsync",
     "2",  # http://ffmpeg.org/pipermail/ffmpeg-user/2018-May/039926.html
     "-movflags",
