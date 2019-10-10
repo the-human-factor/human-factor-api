@@ -16,8 +16,6 @@ from flask_marshmallow import Marshmallow
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy_mixins import AllFeaturesMixin
 
-import rq_dashboard
-
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
@@ -42,14 +40,14 @@ class BaseModel(db.Model, AllFeaturesMixin):
 def create_app(name=__name__):
   import api.routes as routes
   import api.resources as resources
-  from api.jobs import rq
+  from api.jobs import celery
 
   app = Flask(name)
   FlaskDynaconf(app)  # Initialize config
   config_logging(app)
   config_sentry(app)
   config_db(app)
-  config_redis(app, rq)
+  config_redis(app)
 
   cors = CORS(app, resources={r"/api/*": {"origins": app.config["ALLOWED_ORIGINS"]}})
 
@@ -60,9 +58,7 @@ def create_app(name=__name__):
   routes.api.init_app(app)
   resources.jwt.init_app(app)
   bcrypt.init_app(app)
-  rq.init_app(app)
-
-  app.register_blueprint(rq_dashboard.blueprint, url_prefix="/api/admin/jobs")
+  celery.conf.update(app.config)
 
   @app.before_request
   def set_request_id():
@@ -81,6 +77,13 @@ def create_app(name=__name__):
     from api.jobs import ingest_local_video2
 
     ingest_local_video2.queue("async")
+    return "ok", 201
+
+  @app.route("/encode_c")
+  def encode_c():
+    from api.jobs import ingest_local_video2
+
+    ingest_local_video2.delay("celery")
     return "ok", 201
 
   @app.route("/encode")
@@ -115,14 +118,6 @@ def create_app(name=__name__):
     except DatabaseError:
       db.session.rollback()
       raise
-
-  @app.route("/test-job")
-  def test_job():
-    from api.jobs import rq, test_job
-
-    job = test_job.queue(2, 3)
-    print(job)
-    return "ok", 201
 
   return app
 
@@ -159,21 +154,10 @@ def config_db(app):
   )
 
 
-def config_redis(app, rq):
-  if app.config["REDIS_PASSWORD"]:
-    app.config["RQ_REDIS_URL"] = "redis://:{}@{}:{}/{}".format(
-      app.config["REDIS_PASSWORD"],
-      app.config["REDIS_HOST"],
-      app.config["REDIS_PORT"],
-      app.config["REDIS_DB"],
-    )
-  else:
-    app.config["RQ_REDIS_URL"] = "redis://{}:{}/{}".format(
-      app.config["REDIS_HOST"], app.config["REDIS_PORT"], app.config["REDIS_DB"]
-    )
+def config_redis(app):
+  from api.utils import get_redis_url
 
-  app.config["RQ_DASHBOARD_REDIS_URL"] = app.config["RQ_REDIS_URL"]
-  rq.redis_url = app.config["RQ_REDIS_URL"]
+  redis_url = get_redis_url()
 
   app.logger.info(
     "App configured to talk to Redis: %s",

@@ -22,4 +22,8 @@ api.add_resource(resources.UserLogout, "/api/auth/logout")
 api.add_resource(resources.UserRefresh, "/api/auth/refresh")
 api.add_resource(resources.UserPassword, "/api/auth/password")
 
+
+api.add_resource(
+  admin.video.VideoEncodeAll, "/api/admin/videos/encode/<string:video_id>"
+)
 api.add_resource(admin.video.VideoEncodeAll, "/api/admin/videos/encode")

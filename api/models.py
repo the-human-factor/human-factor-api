@@ -1,4 +1,3 @@
-import tempfile
 import os
 
 from datetime import datetime, timedelta
@@ -6,9 +5,10 @@ from dynaconf import settings
 
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy, Model
-from google.cloud import storage
 from flask_sqlalchemy import SQLAlchemy, Model
 from flask_jwt_extended import create_access_token, create_refresh_token
+from google.cloud import storage
+from tempfile import TemporaryDirectory
 
 import sqlalchemy
 from sqlalchemy.exc import DatabaseError
@@ -65,25 +65,22 @@ class Video(BaseModel):
     extension = get_extension_from_content_type(file)
     source_name = "{}.{}".format(video.id, extension)
 
-    # These can be used later for ingestion to not need a redownload.
-    # TODO(Alex): It could be done on upload, something like this:
-    # https://github.com/pallets/werkzeug/issues/1344#issuecomment-440589308
-    temp_dir = tempfile.mkdtemp(prefix="upload_video")
-    path = os.path.join(temp_dir, source_name)
-    file.save(path, buffer_size=BUFFER_SIZE)  # TODO: make constant
+    with TemporaryDirectory(prefix="upload_video") as temp_dir:
+      path = os.path.join(temp_dir, source_name)
+      file.save(path, buffer_size=BUFFER_SIZE)  # TODO: make constant
 
-    storage_client = storage.Client()
-    bucket = storage_client.get_bucket(current_app.config["STATIC_BUCKET"])
-    blob = bucket.blob(current_app.config["BUCKET_SOURCE_PREFIX"] + source_name)
+      storage_client = storage.Client()
+      bucket = storage_client.get_bucket(current_app.config["STATIC_BUCKET"])
+      blob = bucket.blob(current_app.config["BUCKET_SOURCE_PREFIX"] + source_name)
 
-    blob.upload_from_filename(
-      path, content_type=file.content_type, predefined_acl="publicRead"
-    )
+      blob.upload_from_filename(
+        path, content_type=file.content_type, predefined_acl="publicRead"
+      )
 
     video.update(url=blob.public_url, source_url=blob.public_url)
 
     # Enqueue
-    ingest_video.queue(video.id)
+    ingest_video.delay(video.id)
 
     return video
 
@@ -91,7 +88,7 @@ class Video(BaseModel):
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(current_app.config["STATIC_BUCKET"])
 
-    with tempfile.mkdtemp(prefix="media") as temp_dir:
+    with TemporaryDirectory(prefix="media") as temp_dir:
       source_name = self.source_url_blob_name
       source_video_path = os.path.join(temp_dir, source_name)
       blob = bucket.blob(current_app.config["BUCKET_SOURCE_PREFIX"] + source_name)
@@ -120,10 +117,13 @@ class Video(BaseModel):
       crf=config["FFMPEG_DEFAULT_CRF"],
       speed=config["FFMPEG_DEFAULT_SPEED"],
     )
+
     video_stats = ffmpeg.info(reencoded_path)
+
     ffmpeg.capture_still(
       reencoded_path, still_path, at_time=video_stats["duration"] / 1.8
     )
+
     ffmpeg.resize_image(
       still_path, thumbnail_path, width=config["STILL_THUMBNAIL_WIDTH"]
     )

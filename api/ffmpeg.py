@@ -49,7 +49,7 @@ def encode_mp4(input_path, output_path, crf="17", speed="slower"):
     "-preset",
     speed,
     "-loglevel",
-    "debug",
+    "info",
     "-vsync",
     "2",  # http://ffmpeg.org/pipermail/ffmpeg-user/2018-May/039926.html
     "-movflags",
