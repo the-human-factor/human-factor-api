@@ -90,14 +90,15 @@ class Video(BaseModel):
   def ingest_source_from_bucket(self):
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(current_app.config["STATIC_BUCKET"])
-    temp_dir = tempfile.mkdtemp(prefix="media")
-    source_name = self.source_url_blob_name
-    source_video_path = os.path.join(temp_dir, source_name)
-    blob = bucket.blob(current_app.config["BUCKET_SOURCE_PREFIX"] + source_name)
 
-    blob.download_to_filename(source_video_path)
+    with tempfile.mkdtemp(prefix="media") as temp_dir:
+      source_name = self.source_url_blob_name
+      source_video_path = os.path.join(temp_dir, source_name)
+      blob = bucket.blob(current_app.config["BUCKET_SOURCE_PREFIX"] + source_name)
 
-    self.ingest_local_source(temp_dir, source_video_path)
+      blob.download_to_filename(source_video_path)
+
+      self.ingest_local_source(temp_dir, source_video_path)
 
   def ingest_local_source(self, temp_dir, source_video_name):
     config = current_app.config

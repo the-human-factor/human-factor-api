@@ -76,6 +76,20 @@ def create_app(name=__name__):
   def version():
     return app.config["GIT_COMMIT_SHA"]
 
+  @app.route("/encode_a")
+  def encode_a():
+    from api.jobs import ingest_local_video2
+
+    ingest_local_video2.queue("async")
+    return "ok", 201
+
+  @app.route("/encode")
+  def encode():
+    from api.jobs import ingest_local_video2
+
+    ingest_local_video2("sync")
+    return "ok", 201
+
   @app.shell_context_processor
   def make_shell_context():
     """
