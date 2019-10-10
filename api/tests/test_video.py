@@ -1,4 +1,6 @@
 import io
+import pytest
+
 from flask import url_for
 import api.tests.factories as f
 import api.models as m
@@ -42,4 +44,4 @@ def test_ingest_source_from_bucket():
   video.ingest_source_from_bucket()
   assert video.source_width == 640
   assert video.source_height == 480
-  assert video.source_duration_sec == 4.186
+  assert video.source_duration_sec == pytest.approx(4.1, 0.1)
