@@ -105,7 +105,7 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: ["pipenv"]
-          args: ["celery", "worker", "-A", "api.celery_worker.celery", "--loglevel=info"]
+          args: ["run", "celery", "worker", "-A", "api.celery_worker.celery", "--loglevel=info"]
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
             - name: credentials
