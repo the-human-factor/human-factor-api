@@ -43,7 +43,7 @@ def create_app(name=__name__):
   from api.jobs import celery
 
   app = Flask(name)
-  FlaskDynaconf(app)  # Initialize config
+  FlaskDynaconf(app, ENVVAR_PREFIX_FOR_DYNACONF="FLASK_")  # Initialize config
   config_logging(app)
   config_sentry(app)
   config_db(app)
