@@ -30,7 +30,7 @@ spec:
             - name: ENV_FOR_DYNACONF
               value: {{ .Values.environment }}
             - name: FLASK_DB_HOST
-              value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
+              value: {{ .Values.environment }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
             - name: FLASK_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -54,7 +54,7 @@ spec:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /credentials/google-credentials.json
             - name: FLASK_DB_HOST
-              value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
+              value: {{ .Values.environment }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
             - name: FLASK_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -119,7 +119,7 @@ spec:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /credentials/google-credentials.json
             - name: FLASK_DB_HOST
-              value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
+              value: {{ .Values.environment }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local
             - name: FLASK_DB_PASSWORD
               valueFrom:
                 secretKeyRef:

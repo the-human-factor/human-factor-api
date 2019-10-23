@@ -41,7 +41,6 @@ GIT_COMMIT_SHA="test"
 REDIS_HOST="redis"
 
 [staging]
-DB_HOST="human-api-db-postgresql.staging.svc.cluster.local"
 GIT_COMMIT_SHA="{{GIT_COMMIT_SHA}}"
 SENTRY_DSN="https://e58d119f6182413798cd669a8a46ddc9@sentry.io/1494502"
 REDIS_HOST="staging-redis-master.staging.svc.cluster.local"
