@@ -296,6 +296,14 @@ class Response(BaseModel):
     UUID(as_uuid=True), db.ForeignKey("challenges.id"), primary_key=True
   )
 
+  sequence_response = db.relationship("SequenceResponse", backref="responses")
+  sequence_response_id = db.Column(
+    UUID(as_uuid=True),
+    db.ForeignKey("sequence_responses.id", name="responses_sequence_responses_id_fkey"),
+    primary_key=True,
+    nullable=True,
+  )
+
   user = db.relationship("User", backref="responses")
   user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"), primary_key=True)
 
@@ -305,6 +313,66 @@ class Response(BaseModel):
   created_at = db.Column(
     db.DateTime(timezone=True), server_default=func.now(), nullable=False
   )
+  updated_at = db.Column(
+    db.DateTime(timezone=True),
+    server_default=func.now(),
+    onupdate=datetime.utcnow,
+    nullable=False,
+  )
+
+
+class Sequence(BaseModel):
+  __tablename__ = "sequences"
+
+  id = db.Column(
+    UUID(as_uuid=True),
+    server_default=sqlalchemy.text("gen_random_uuid()"),
+    primary_key=True,
+  )
+
+  title = db.Column(db.Unicode(length=255), nullable=False)
+  items_json = db.Column(db.UnicodeText, nullable=False)
+  items_length = db.Column(db.Integer, nullable=False)
+
+  created_at = db.Column(
+    db.DateTime(timezone=True), server_default=func.now(), nullable=False
+  )
+  updated_at = db.Column(
+    db.DateTime(timezone=True),
+    server_default=func.now(),
+    onupdate=datetime.utcnow,
+    nullable=False,
+  )
+
+
+class SequenceResponse(BaseModel):
+  __tablename__ = "sequence_responses"
+
+  id = db.Column(
+    UUID(as_uuid=True),
+    server_default=sqlalchemy.text("gen_random_uuid()"),
+    primary_key=True,
+    unique=True,  # Needed to add this so that responses+ this fkey didn't error.
+  )
+
+  user = db.relationship("User", backref="sequence_responses")
+  user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"), primary_key=True)
+
+  sequence = db.relationship("Sequence", backref="sequence_responses")
+  sequence_id = db.Column(
+    UUID(as_uuid=True), db.ForeignKey("sequences.id"), primary_key=True
+  )
+
+  hidden_from_respondent = db.Column(db.Boolean, default=False, nullable=False)
+
+  started_at = db.Column(db.DateTime(timezone=True), nullable=True)
+
+  items_finished = db.Column(db.Integer, default=0, nullable=False)
+
+  created_at = db.Column(
+    db.DateTime(timezone=True), server_default=func.now(), nullable=False
+  )
+
   updated_at = db.Column(
     db.DateTime(timezone=True),
     server_default=func.now(),
