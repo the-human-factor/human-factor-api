@@ -13,7 +13,7 @@ from tempfile import TemporaryDirectory
 import sqlalchemy
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import backref
+from sqlalchemy.orm import backref, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -282,6 +282,16 @@ class BlacklistedToken(BaseModel):
   exp = db.Column(db.DateTime(timezone=True), nullable=False)
 
 
+sequence_response_response_association_table = db.Table(
+  "sequence_response_response_association",
+  BaseModel.metadata,
+  db.Column(
+    "sequence_responses_id", UUID(as_uuid=True), db.ForeignKey("sequence_responses.id")
+  ),
+  db.Column("response_id", UUID(as_uuid=True), db.ForeignKey("responses.id")),
+)
+
+
 class Response(BaseModel):
   __tablename__ = "responses"
 
@@ -289,6 +299,7 @@ class Response(BaseModel):
     UUID(as_uuid=True),
     server_default=sqlalchemy.text("gen_random_uuid()"),
     primary_key=True,
+    unique=True,
   )
 
   challenge = db.relationship("Challenge", backref="responses")
@@ -302,9 +313,100 @@ class Response(BaseModel):
   video = db.relationship("Video", backref=backref("response", uselist=False))
   video_id = db.Column(UUID(as_uuid=True), db.ForeignKey("videos.id"), nullable=True)
 
+  hidden = db.Column(db.Boolean, default=False, nullable=False)
+
+  sequence_responses = relationship(
+    "SequenceResponse", secondary=sequence_response_response_association_table
+  )
+
   created_at = db.Column(
     db.DateTime(timezone=True), server_default=func.now(), nullable=False
   )
+  updated_at = db.Column(
+    db.DateTime(timezone=True),
+    server_default=func.now(),
+    onupdate=datetime.utcnow,
+    nullable=False,
+  )
+
+
+sequence_challenges_association_table = db.Table(
+  "sequence_challenges_association",
+  BaseModel.metadata,
+  db.Column("sequence_id", UUID(as_uuid=True), db.ForeignKey("sequences.id")),
+  db.Column("challenge_id", UUID(as_uuid=True), db.ForeignKey("challenges.id")),
+)
+
+sequence_videos_association_table = db.Table(
+  "sequence_videos_association",
+  BaseModel.metadata,
+  db.Column("sequence_id", UUID(as_uuid=True), db.ForeignKey("sequences.id")),
+  db.Column("video_id", UUID(as_uuid=True), db.ForeignKey("videos.id")),
+)
+
+
+class Sequence(BaseModel):
+  __tablename__ = "sequences"
+
+  id = db.Column(
+    UUID(as_uuid=True),
+    server_default=sqlalchemy.text("gen_random_uuid()"),
+    primary_key=True,
+  )
+
+  title = db.Column(db.Unicode(length=255), nullable=False)
+  items_json = db.Column(db.UnicodeText, nullable=False)
+  items_length = db.Column(db.Integer, nullable=False)
+
+  challenges = relationship(
+    "Challenge", secondary=sequence_challenges_association_table
+  )
+
+  videos = relationship("Video", secondary=sequence_videos_association_table)
+
+  created_at = db.Column(
+    db.DateTime(timezone=True), server_default=func.now(), nullable=False
+  )
+  updated_at = db.Column(
+    db.DateTime(timezone=True),
+    server_default=func.now(),
+    onupdate=datetime.utcnow,
+    nullable=False,
+  )
+
+
+class SequenceResponse(BaseModel):
+  __tablename__ = "sequence_responses"
+
+  id = db.Column(
+    UUID(as_uuid=True),
+    server_default=sqlalchemy.text("gen_random_uuid()"),
+    primary_key=True,
+    unique=True,  # Needed to add this so that responses+ this fkey didn't error.
+  )
+
+  user = db.relationship("User", backref="sequence_responses")
+  user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id"), primary_key=True)
+
+  sequence = db.relationship("Sequence", backref="sequence_responses")
+  sequence_id = db.Column(
+    UUID(as_uuid=True), db.ForeignKey("sequences.id"), primary_key=True
+  )
+
+  responses = relationship(
+    "Response", secondary=sequence_response_response_association_table
+  )
+
+  hide_responses = db.Column(db.Boolean, default=False, nullable=False)
+
+  started_at = db.Column(db.DateTime(timezone=True), nullable=True)
+  items_finished = db.Column(db.Integer, default=0, nullable=False)
+  finished = db.Column(db.Boolean, default=False, nullable=False)
+
+  created_at = db.Column(
+    db.DateTime(timezone=True), server_default=func.now(), nullable=False
+  )
+
   updated_at = db.Column(
     db.DateTime(timezone=True),
     server_default=func.now(),

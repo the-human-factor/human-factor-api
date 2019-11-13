@@ -1,17 +1,23 @@
 from flask import request, abort
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy.orm import joinedload
 
 import api.models as m
 import api.schemas as s
-from api.auth import is_admin
+from api.auth import is_admin, abortUnauthorized
 
 
 class Response(Resource):
   @jwt_required
   def get(self, response_id):
     response = m.Response.query.get_or_404(response_id)
+
+    if response.sequence_response is not None:
+      if response.sequence_response.hidden_from_respondent and not is_admin():
+        abortUnauthorized()
+
+    if not is_admin() and response.user_id is not get_jwt_identity():
+      abortUnauthorized()
 
     return s.ResponseSchema().jsonify(response).json, 200
 
@@ -35,8 +41,7 @@ class CreateResponse(Resource):
       challenge_id = request.form["challengeId"]
       video_blob = request.files["videoBlob"]
     except (KeyError, AttributeError) as e:
-      print("Request missing values")
-      abort(400)
+      abort(400, "Request missing values")
 
     video = m.Video().create_and_upload(video_blob)
     challenge = m.Challenge.query.get_or_404(challenge_id)

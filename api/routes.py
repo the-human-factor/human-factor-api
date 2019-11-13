@@ -16,6 +16,20 @@ api.add_resource(resources.ResponseList, "/api/responses")
 api.add_resource(resources.CreateResponse, "/api/responses/create")
 api.add_resource(resources.Response, "/api/responses/<string:response_id>")
 
+api.add_resource(resources.SequenceList, "/api/sequences")
+api.add_resource(resources.CreateSequence, "/api/sequences/create")
+api.add_resource(resources.Sequence, "/api/sequences/<string:sequence_id>")
+
+api.add_resource(resources.SequenceResponseList, "/api/sequenceresponses")
+api.add_resource(
+  resources.CreateSequenceResponseInvite, "/api/sequenceresponses/invite"
+)
+api.add_resource(resources.StartSequenceResponse, "/api/sequenceresponses/start")
+api.add_resource(resources.RespondToSequenceResponse, "/api/sequenceresponses/respond")
+api.add_resource(
+  resources.SequenceResponse, "/api/sequenceresponses/<string:sequence_response_id>"
+)
+
 api.add_resource(resources.UserRegister, "/api/auth/register")
 api.add_resource(resources.UserLogin, "/api/auth/login")
 api.add_resource(resources.UserLogout, "/api/auth/logout")
