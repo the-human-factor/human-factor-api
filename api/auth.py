@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, jsonify
+from flask import request, jsonify, abort
 
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_claims
 
@@ -16,6 +16,12 @@ def is_admin():
   return get_role() == "admin" or is_super_admin()
 
 
+def abortUnauthorized():
+  abort(
+    403, "You are not authorized to access this resource", error="UnauthorizedError"
+  )
+
+
 def super_admin_required(fn):
   @wraps(fn)
   def wrapper(*args, **kwargs):
@@ -24,15 +30,7 @@ def super_admin_required(fn):
     if is_super_admin():
       return fn(*args, **kwargs)
     else:
-      return (
-        jsonify(
-          {
-            "error": "UnauthorizedError",
-            "message": "You are not authorized to access this resource",
-          }
-        ),
-        403,
-      )
+      abortUnauthorized()
 
   return wrapper
 
@@ -45,15 +43,7 @@ def admin_required(fn):
     if get_role() in set(["super_admin", "admin"]):
       return fn(*args, **kwargs)
     else:
-      return (
-        jsonify(
-          {
-            "error": "UnauthorizedError",
-            "message": "You are not authorized to access this resource",
-          }
-        ),
-        403,
-      )
+      abortUnauthorized()
 
   return wrapper
 
@@ -66,14 +56,6 @@ def user_required(fn):
     if get_role() in set(["super_admin", "admin", "user"]):
       return fn(*args, **kwargs)
     else:
-      return (
-        jsonify(
-          {
-            "error": "UnauthorizedError",
-            "message": "You are not authorized to access this resource",
-          }
-        ),
-        403,
-      )
+      abortUnauthorized()
 
   return wrapper
