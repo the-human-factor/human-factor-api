@@ -19,7 +19,7 @@ test:
 	docker-compose exec api bash -c "FLASK_ENV=testing ENV_FOR_DYNACONF=testing pipenv run pytest"
 
 .PHONY: test-dev
-## Runs the tests
+## Runs the tests continuously on file changes
 test-dev:
 	docker-compose exec api bash -c "FLASK_ENV=testing ENV_FOR_DYNACONF=testing pipenv run ptw -- --testmon"
 

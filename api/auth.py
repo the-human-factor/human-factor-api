@@ -22,6 +22,18 @@ def abortUnauthorized():
   )
 
 
+def unauthorized():
+  return (
+    jsonify(
+      {
+        "error": "UnauthorizedError",
+        "message": "You are not authorized to access this resource",
+      }
+    ),
+    403,
+  )
+
+
 def super_admin_required(fn):
   @wraps(fn)
   def wrapper(*args, **kwargs):
@@ -30,7 +42,7 @@ def super_admin_required(fn):
     if is_super_admin():
       return fn(*args, **kwargs)
     else:
-      abortUnauthorized()
+      return unauthorized()
 
   return wrapper
 
@@ -43,7 +55,7 @@ def admin_required(fn):
     if get_role() in set(["super_admin", "admin"]):
       return fn(*args, **kwargs)
     else:
-      abortUnauthorized()
+      return unauthorized()
 
   return wrapper
 
@@ -56,6 +68,6 @@ def user_required(fn):
     if get_role() in set(["super_admin", "admin", "user"]):
       return fn(*args, **kwargs)
     else:
-      abortUnauthorized()
+      return unauthorized()
 
   return wrapper

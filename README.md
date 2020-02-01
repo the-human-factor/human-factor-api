@@ -17,6 +17,8 @@ $ docker-compose up -d
 $ make migrate
 ```
 
+You may want to rebuild the image with `docker-compose build` or `docker-compose up --build`.
+
 You should see output that looks like this:
 
 ```
@@ -69,6 +71,14 @@ We use [pipenv](https://github.com/pypa/pipenv) to manage our python dependencie
 ```
 # pipenv install <dependency>
 ```
+
+### Changing the DB
+
+```bash
+$ dc exec api pipenv run flask db migrate -m "message"
+$ dc exec api pipenv run flask db upgrade
+```
+
 
 ### Recreate the db and blow away old versions
 

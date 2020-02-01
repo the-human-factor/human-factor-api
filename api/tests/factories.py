@@ -53,3 +53,58 @@ class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):
 
 class ChallengeWithResponseFactory(ChallengeFactory):
   membership = factory.RelatedFactory(ResponseFactory, "challenge")
+
+
+def create_sequence_json(challenges, videos):
+  result = []
+  i = 100
+  for challenge in challenges:
+    result.append({"id": i, "type": "challenge", "challenge_id": challenge.id})
+    i += 1
+  for video in videos:
+    result.append({"id": i, "type": "video", "challenge_id": video.id})
+    i += 1
+
+
+class SequenceFactory(factory.alchemy.SQLAlchemyModelFactory):
+  class Meta:
+    model = m.Sequence
+    sqlalchemy_session = m.db.session
+
+  title = factory.Faker("name")
+  items_json = "[]"
+  items_length = 0
+
+  # @factory.post_generation
+  # def items_json(self, create, extracted, **kwargs):
+  #   if not create:
+  #     return  # Simple build, do nothing.
+
+  #   print(kwargs)
+  #   self.items_json = create_sequence_json(kwargs["challenges"], kwargs["videos"])
+  #   self.items_length = len(kwargs["challenges"]) + len(kwargs["videos"])
+
+  @factory.post_generation
+  def challenges(self, create, extracted):
+    if not create:
+      return  # Simple build, do nothing.
+
+    if extracted:
+      for challenge in extracted:
+        self.challeges.add(challenge)
+
+    print("post_generation challenges")
+
+  @factory.post_generation
+  def videos(self, create, extracted):
+    if not create:
+      return  # Simple build, do nothing.
+
+    if extracted:
+      for video in extracted:
+        self.videos.add(video)
+
+    print("post_generation video")
+    self.items_json = create_sequence_json(self.challenges, self.videos)
+    self.items_length = len(self.challenges) + len(self.videos)
+    print("created items_json")
