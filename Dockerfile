@@ -37,7 +37,7 @@ USER human
 ENV PATH="/home/human/.local/bin:${PATH}"
 
 COPY --from=build-env /tmp/eradman-entr-33816756113b/entr /usr/local/bin/
-COPY --from=build-env /tmp/ffmpeg-4.2.1-amd64-static/* /usr/local/bin/
+COPY --from=build-env /tmp/ffmpeg-4.*-amd64-static/* /usr/local/bin/
 COPY ./Pipfile* /app/
 
 ENV LC_ALL C.UTF-8
@@ -54,7 +54,7 @@ COPY . /app
 FROM debian:10.0 AS prod-env
 
 RUN apt-get update -y && \
-    apt-get install -y python3-dev python3-pip postgresql-client libpq-dev ffmpeg && \
+    apt-get install -y python3-dev python3-pip postgresql-client libpq-dev && \
     update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 1 && \
     update-alternatives --install /usr/local/bin/pip pip /usr/bin/pip3 1 && \
     rm -rf /var/lib/apt/lists/*
@@ -66,7 +66,7 @@ USER human
 
 ENV PATH="/home/human/.local/bin:${PATH}"
 
-COPY --from=build-env /tmp/ffmpeg-4.2.1-amd64-static/* /usr/local/bin/
+COPY --from=build-env /tmp/ffmpeg-4.*-amd64-static/* /usr/local/bin/
 COPY ./Pipfile* /app/
 
 ENV LC_ALL C.UTF-8
