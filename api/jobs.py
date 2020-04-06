@@ -1,13 +1,9 @@
-import os
 import uuid
-import ffmpeg
-import subprocess
+
 import structlog
-from dynaconf import settings
+
 from celery import Celery
 
-
-from api.ffmpeg import encode_mp4
 from api.utils import get_redis_url
 
 redis_url = get_redis_url()

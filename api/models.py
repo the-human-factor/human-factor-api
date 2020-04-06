@@ -1,17 +1,15 @@
 import os
+import structlog
 
 from datetime import datetime, timedelta
 from dynaconf import settings
 
 from flask import current_app
-from flask_sqlalchemy import SQLAlchemy, Model
-from flask_sqlalchemy import SQLAlchemy, Model
 from flask_jwt_extended import create_access_token, create_refresh_token
 from google.cloud import storage
 from tempfile import TemporaryDirectory
 
 import sqlalchemy
-from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
 from sqlalchemy.sql import func
@@ -21,6 +19,8 @@ from api.app import db, bcrypt, BaseModel
 from api import ffmpeg
 from api.utils import get_extension_from_content_type
 from api.jobs import ingest_video
+
+log = structlog.get_logger()
 
 BUFFER_SIZE = 2 ** 14  # 16KiB
 
@@ -111,6 +111,7 @@ class Video(BaseModel):
     still_path = os.path.join(temp_dir, still_name)
     thumbnail_path = os.path.join(temp_dir, output_thumbnail_name)
 
+    log.info("enc: ncoding video", source_path)
     ffmpeg.encode_mp4(
       source_path,
       reencoded_path,
@@ -119,6 +120,7 @@ class Video(BaseModel):
     )
 
     video_stats = ffmpeg.info(reencoded_path)
+    log.info("enc: encoding video", reencoded_path)
 
     ffmpeg.capture_still(
       reencoded_path, still_path, at_time=video_stats["duration"] / 1.8
@@ -132,6 +134,8 @@ class Video(BaseModel):
     still_blob = bucket.blob(config["BUCKET_STILL_PREFIX"] + still_name)
     thumbnail_blob = bucket.blob(config["BUCKET_THUMB_PREFIX"] + still_name)
 
+    log.info("enc: uploading blobs", reencoded_blob, still_blob, thumbnail_blob)
+
     reencoded_blob.upload_from_filename(
       reencoded_path, content_type="video/mp4", predefined_acl="publicRead"
     )
@@ -143,6 +147,8 @@ class Video(BaseModel):
     thumbnail_blob.upload_from_filename(
       thumbnail_path, content_type="image/jpeg", predefined_acl="publicRead"
     )
+
+    log.info("enc: updating postgres")
 
     self.update(
       url=reencoded_blob.public_url,
