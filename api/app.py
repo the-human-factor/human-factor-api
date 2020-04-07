@@ -15,9 +15,9 @@ from sqlalchemy_mixins import AllFeaturesMixin
 
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
-
-# TODO: Hook up sentry with sqlalchemy
-# from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 
 class SQLAlchemy(_BaseSQLAlchemy):
@@ -164,7 +164,12 @@ def config_redis(app):
 def config_sentry(app):
   sentry_sdk.init(
     app.config["SENTRY_DSN"],
-    integrations=[FlaskIntegration(transaction_style="url")],
+    integrations=[
+      FlaskIntegration(transaction_style="url"),
+      CeleryIntegration(),
+      SqlalchemyIntegration(),
+      RedisIntegration(),
+    ],
     environment=app.config["ENV"],
     release=f"human-factor-api@{app.config['GIT_COMMIT_SHA']}",
   )
