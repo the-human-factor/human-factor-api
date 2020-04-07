@@ -27,7 +27,7 @@ class Challenge(Resource):
     try:
       patch = JsonPatch(request.get_json(force=True))
     except (KeyError, AttributeError) as e:
-      log("Request missing values")
+      log("Request missing values", error=e)
       abort(400)
 
     schema = s.ChallengeSchema()
@@ -76,7 +76,6 @@ class CreateChallenge(Resource):
 class ChallengeList(Resource):
   @jwt_required
   def get(self):
-    user = m.User.query.get(get_jwt_identity())
     if is_admin():
       challenges = (
         m.Challenge.query.filter(m.Challenge.deleted_at.is_(None))
@@ -88,8 +87,8 @@ class ChallengeList(Resource):
     else:
       challenges = (
         m.Challenge.query.filter(
-          m.Challenge.deleted_at.is_(None) & (m.Challenge.listed == True)
-          | (m.Challenge.user_id == get_jwt_identity())
+          m.Challenge.deleted_at.is_(None)
+          & (m.Challenge.listed | (m.Challenge.user_id == get_jwt_identity()))
         )
         .options(joinedload("video"), joinedload("user"))
         .all()

@@ -1,4 +1,3 @@
-import os
 import subprocess
 import structlog
 import functools
@@ -29,7 +28,7 @@ def info(input_path):
 
 
 #
-# FFMPEF H.264 settings:
+# FFmpeg H.264 settings:
 # https://trac.ffmpeg.org/wiki/Encode/H.264
 def encode_mp4(input_path, output_path, crf="17", speed="slower"):
   """Encodes a source input video into a mp4 with h264 encoding.

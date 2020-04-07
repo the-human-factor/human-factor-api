@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.4"
 
 volumes:
   devdb:
@@ -28,8 +28,8 @@ services:
     ports:
       - "9000:9000"
     volumes:
-        - ./:/app
-        - ${PWD}/.pdbrc.py:/home/human/.pdbrc.py
+      - ./:/app
+      - ${PWD}/.pdbrc.py:/home/human/.pdbrc.py
     depends_on:
       - db
       - worker
@@ -37,7 +37,7 @@ services:
     build:
       context: .
       target: dev-env
-    command: sh -c 'ack -f | entr pipenv run celery worker -A api.celery_worker.celery --loglevel=info'
+    command: sh -c 'ack -f | pipenv run celery worker -A api.celery_worker.celery --loglevel=info'
     tty: true
     stdin_open: true
     environment:
@@ -46,8 +46,8 @@ services:
       POSTGRES_USER: postgres
       FLASK_JWT_SECRET_KEY: 27a74d58e693489beb79b626300618f6d241443b3d4ed228d7bd15d67a6ad9fe
     volumes:
-        - ./:/app
-        - ${PWD}/.pdbrc.py:/home/human/.pdbrc.py
+      - ./:/app
+      - ${PWD}/.pdbrc.py:/home/human/.pdbrc.py
     depends_on:
       - db
       - redis
