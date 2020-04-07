@@ -14,8 +14,8 @@ def module_classes_as_dict(module_name):
 
 
 def get_extension_from_content_type(f):
-  content_type = f.content_type.split("/")
-  if len(content_type) == 2:
+  content_type = f.content_type.replace(";", "/").split("/")
+  if len(content_type) == 3 or len(content_type) == 2:
     return content_type[1]
   return ""  # unknown filetype
 

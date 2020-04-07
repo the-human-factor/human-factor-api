@@ -54,11 +54,11 @@ class CreateChallenge(Resource):
     try:
       title = request.form["title"]
       instructions = request.form["instructions"]
-      grading_notes = request.form["gradingNotes"]
       video_blob = request.files["videoBlob"]
     except (KeyError, AttributeError) as e:
-      log.info("Request missing values")
+      log.info("Request missing values", error=e)
       abort(400)
+    grading_notes = request.form.get("gradingNotes", "")
 
     video = m.Video().create_and_upload(video_blob)
 

@@ -4,6 +4,7 @@ import structlog
 
 from celery import Celery
 
+from api.app import db
 from api.utils import get_redis_url
 
 redis_url = get_redis_url()
@@ -21,5 +22,6 @@ def ingest_video(video_id, req_id="00" + str(uuid.uuid4())):
 
   video = m.Video.where(id=video_id).one_or_none()
   video.ingest_source_from_bucket()
+  db.session.commit()
 
   log.info("Video encoding finished")

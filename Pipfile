@@ -40,6 +40,7 @@ pillow = "*"
 jsonpatch = "*"
 ffmpeg-python = "*"
 celery = {extras = ["redis"],version = "*"}
+backoff = "*"
 
 [requires]
 python_version = "3.7"

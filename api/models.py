@@ -15,6 +15,10 @@ from sqlalchemy.orm import backref
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 
+import backoff
+
+from psycopg2.errors import DeadlockDetected
+
 from api.app import db, bcrypt, BaseModel
 from api import ffmpeg
 from api.utils import get_extension_from_content_type
@@ -67,7 +71,7 @@ class Video(BaseModel):
 
     with TemporaryDirectory(prefix="upload_video") as temp_dir:
       path = os.path.join(temp_dir, source_name)
-      file.save(path, buffer_size=BUFFER_SIZE)  # TODO: make constant
+      file.save(path, buffer_size=BUFFER_SIZE)
 
       storage_client = storage.Client()
       bucket = storage_client.get_bucket(current_app.config["STATIC_BUCKET"])
@@ -80,7 +84,10 @@ class Video(BaseModel):
     video.update(url=blob.public_url, source_url=blob.public_url)
 
     # Enqueue
-    ingest_video.delay(video.id)
+    # Want this to happen after the request inserts, but then would want to update
+    # the thumbnails in the UI...
+    # TODO: update UI after video thumb posts
+    ingest_video.apply_async(args=[video.id], countdown=5)
 
     return video
 
@@ -111,7 +118,6 @@ class Video(BaseModel):
     still_path = os.path.join(temp_dir, still_name)
     thumbnail_path = os.path.join(temp_dir, output_thumbnail_name)
 
-    log.info("enc: ncoding video", source_path)
     ffmpeg.encode_mp4(
       source_path,
       reencoded_path,
@@ -120,7 +126,6 @@ class Video(BaseModel):
     )
 
     video_stats = ffmpeg.info(reencoded_path)
-    log.info("enc: encoding video", reencoded_path)
 
     ffmpeg.capture_still(
       reencoded_path, still_path, at_time=video_stats["duration"] / 1.8
@@ -134,8 +139,6 @@ class Video(BaseModel):
     still_blob = bucket.blob(config["BUCKET_STILL_PREFIX"] + still_name)
     thumbnail_blob = bucket.blob(config["BUCKET_THUMB_PREFIX"] + still_name)
 
-    log.info("enc: uploading blobs", reencoded_blob, still_blob, thumbnail_blob)
-
     reencoded_blob.upload_from_filename(
       reencoded_path, content_type="video/mp4", predefined_acl="publicRead"
     )
@@ -148,17 +151,20 @@ class Video(BaseModel):
       thumbnail_path, content_type="image/jpeg", predefined_acl="publicRead"
     )
 
-    log.info("enc: updating postgres")
+    @backoff.on_exception(backoff.expo, DeadlockDetected, max_tries=3)
+    def update():
+      # When all the workers try to update at once, there is a deadlock
+      self.update(
+        url=reencoded_blob.public_url,
+        still_url=still_blob.public_url,
+        thumbnail_url=thumbnail_blob.public_url,
+        source_width=video_stats["width"],
+        source_height=video_stats["height"],
+        source_duration_sec=video_stats["duration"],
+        encoded_at=datetime.utcnow(),
+      )
 
-    self.update(
-      url=reencoded_blob.public_url,
-      still_url=still_blob.public_url,
-      thumbnail_url=thumbnail_blob.public_url,
-      source_width=video_stats["width"],
-      source_height=video_stats["height"],
-      source_duration_sec=video_stats["duration"],
-      encoded_at=datetime.utcnow(),
-    )
+    update()
 
 
 class Challenge(BaseModel):
