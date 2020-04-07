@@ -13,9 +13,11 @@ redis:
   image:
     tag: 5.0-debian-9
   existingSecret: human-api-redis-secret
+  cluster:
+    enabled: "false"
 
 environment: staging
-replicaCount: 1
+replicaCount: 0
 workerCount: 1
 
 image:

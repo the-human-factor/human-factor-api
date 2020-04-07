@@ -13,10 +13,12 @@ redis:
   image:
     tag: 5.0-debian-9
   existingSecret: human-api-redis-secret
+  cluster:
+    enabled: "false"
 
 environment: production
-replicaCount: 2
-workerCount: 3
+replicaCount: 1
+workerCount: 1
 
 image:
   repository: gcr.io/the-human-factor/human-api
