@@ -145,9 +145,9 @@ def config_db(app):
     app.config["DB_NAME"],
   )
 
-  app.logger.info(
-    "App configured to talk to DB: %s",
-    "postgresql://{}:*REDACTED*@{}/{}".format(
+  logger.info(
+    "App configured to talk to DB",
+    db_uri="postgresql://{}:*REDACTED*@{}/{}".format(
       app.config["DB_USER"], app.config["DB_HOST"], app.config["DB_NAME"]
     ),
   )
@@ -156,14 +156,9 @@ def config_db(app):
 def config_redis(app):
   from api.utils import get_redis_url
 
-  redis_url = get_redis_url()
+  redis_url = get_redis_url(app.config)
 
-  app.logger.info(
-    "App configured to talk to Redis: %s",
-    "redis://*REDACTED*@{}:{}/{}".format(
-      app.config["REDIS_HOST"], app.config["REDIS_PORT"], app.config["REDIS_DB"]
-    ),
-  )
+  logger.info("App configured to talk to Redis", redis_url=redis_url)
 
 
 def config_sentry(app):

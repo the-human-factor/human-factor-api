@@ -87,7 +87,7 @@ class Video(BaseModel):
     # Want this to happen after the request inserts, but then would want to update
     # the thumbnails in the UI...
     # TODO: update UI after video thumb posts
-    ingest_video.apply_async(args=[video.id], countdown=5)
+    ingest_video.apply_async(args=[video.id], countdown=2)
 
     return video
 
