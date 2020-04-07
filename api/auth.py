@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import jsonify, abort
+from flask import abort
 
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_claims
 
@@ -36,7 +36,6 @@ def super_admin_required(fn):
   @wraps(fn)
   def wrapper(*args, **kwargs):
     verify_jwt_in_request()
-    claims = get_jwt_claims()
     if is_super_admin():
       return fn(*args, **kwargs)
     else:
@@ -49,7 +48,6 @@ def admin_required(fn):
   @wraps(fn)
   def wrapper(*args, **kwargs):
     verify_jwt_in_request()
-    claims = get_jwt_claims()
     if get_role() in set(["super_admin", "admin"]):
       return fn(*args, **kwargs)
     else:
@@ -62,7 +60,6 @@ def user_required(fn):
   @wraps(fn)
   def wrapper(*args, **kwargs):
     verify_jwt_in_request()
-    claims = get_jwt_claims()
     if get_role() in set(["super_admin", "admin", "user"]):
       return fn(*args, **kwargs)
     else:

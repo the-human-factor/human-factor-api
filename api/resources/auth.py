@@ -1,7 +1,7 @@
 import structlog
 from datetime import datetime
 
-from flask import request, abort, current_app
+from flask import request, abort
 from flask_restful import Resource
 
 import api.models as m
@@ -140,9 +140,7 @@ class UserLogout(Resource):
     token = get_raw_jwt()
     jti = token["jti"]
     exp = token["exp"]
-    blacklisted_token = m.BlacklistedToken.create(
-      jti=jti, exp=datetime.utcfromtimestamp(exp)
-    )
+    m.BlacklistedToken.create(jti=jti, exp=datetime.utcfromtimestamp(exp))
 
     return None, 201
 

@@ -48,12 +48,12 @@ def create_app(name=__name__):
   config_db(app)
   config_redis(app)
 
-  cors = CORS(app, resources={r"/api/*": {"origins": app.config["ALLOWED_ORIGINS"]}})
+  CORS(app, resources={r"/api/*": {"origins": app.config["ALLOWED_ORIGINS"]}})
 
   db.init_app(app)  # This needs to come before Marshmallow
   BaseModel.set_session(db.session)
-  migrate = Migrate(app, db)
-  ma = Marshmallow(app)
+  Migrate(app, db)
+  Marshmallow(app)
   routes.api.init_app(app)
   resources.jwt.init_app(app)
   bcrypt.init_app(app)

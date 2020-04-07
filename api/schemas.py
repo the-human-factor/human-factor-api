@@ -1,5 +1,5 @@
 from marshmallow import fields
-from flask_marshmallow.sqla import ModelSchema, HyperlinkRelated
+from flask_marshmallow.sqla import ModelSchema
 
 import api.models as models
 from api.app import db
@@ -24,7 +24,7 @@ class ResponseWithoutChallenges(ModelSchema):
     model = models.Response
     exclude = ["challenges"]  # Prevent circular serialization
     sqla_session = db.session
-    
+
   video = fields.Nested(VideoSchema)
   user = fields.Nested(UserSchema)
 

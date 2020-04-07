@@ -9,9 +9,8 @@ from api.utils import get_redis_url
 
 from dynaconf import LazySettings
 
+# TODO: Fix celery configuration to happen with create_app
 settings = LazySettings(ENVVAR_PREFIX_FOR_DYNACONF="FLASK")
-# ENVVAR_FOR_DYNACONF=ENVVAR_FOR_DYNACONF,
-# ENV_SWITCHER_FOR_DYNACONF=ENV_SWITCHER_FOR_DYNACONF
 
 logger = structlog.get_logger()
 

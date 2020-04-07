@@ -1,11 +1,14 @@
+import structlog
+
 from flask import request, abort
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy.orm import joinedload
 
 import api.models as m
 import api.schemas as s
 from api.auth import is_admin
+
+log = structlog.get_logger()
 
 
 class Response(Resource):
@@ -35,7 +38,7 @@ class CreateResponse(Resource):
       challenge_id = request.form["challengeId"]
       video_blob = request.files["videoBlob"]
     except (KeyError, AttributeError) as e:
-      print("Request missing values")
+      log("Request missing values", error=e)
       abort(400)
 
     video = m.Video().create_and_upload(video_blob)
