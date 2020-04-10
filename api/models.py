@@ -137,17 +137,11 @@ class Video(BaseModel):
     still_blob = bucket.blob(config["BUCKET_STILL_PREFIX"] + still_name)
     thumbnail_blob = bucket.blob(config["BUCKET_THUMB_PREFIX"] + still_name)
 
-    reencoded_blob.upload_from_filename(
-      reencoded_path, content_type="video/mp4", predefined_acl="publicRead"
-    )
+    reencoded_blob.upload_from_filename(reencoded_path, content_type="video/mp4")
 
-    still_blob.upload_from_filename(
-      still_path, content_type="image/jpeg", predefined_acl="publicRead"
-    )
+    still_blob.upload_from_filename(still_path, content_type="image/jpeg")
 
-    thumbnail_blob.upload_from_filename(
-      thumbnail_path, content_type="image/jpeg", predefined_acl="publicRead"
-    )
+    thumbnail_blob.upload_from_filename(thumbnail_path, content_type="image/jpeg")
 
     @backoff.on_exception(backoff.expo, DeadlockDetected, max_tries=3)
     def update():
