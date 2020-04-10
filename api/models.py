@@ -77,9 +77,7 @@ class Video(BaseModel):
       bucket = storage_client.get_bucket(current_app.config["STATIC_BUCKET"])
       blob = bucket.blob(current_app.config["BUCKET_SOURCE_PREFIX"] + source_name)
 
-      blob.upload_from_filename(
-        path, content_type=file.content_type, predefined_acl="publicRead"
-      )
+      blob.upload_from_filename(path, content_type=file.content_type)
 
     video.update(url=blob.public_url, source_url=blob.public_url)
 
