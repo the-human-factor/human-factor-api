@@ -40,7 +40,7 @@ def test_get_video_without_token(client):
 
 
 def test_ingest_source_from_bucket():
-  video = m.Video.create(url="test.webm")
+  video = m.Video.create(url="test.webm", source_url="test.webm")
   video.ingest_source_from_bucket()
   assert video.source_width == 640
   assert video.source_height == 480
