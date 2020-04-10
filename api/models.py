@@ -59,8 +59,16 @@ class Video(BaseModel):
   )
 
   @property
+  def source_url_file_name(self):
+    return self.source_url.split("/")[-1]
+
+  @property
   def source_url_blob_name(self):
-    return self.url.split("/")[-1]
+    return self.source_url.split("thehumanfactor.ai/")[-1]
+
+  @property
+  def source_url_bucket(self):
+    return self.source_url.split("googleapis.com/")[-1].split("/")[0]
 
   @staticmethod
   def create_and_upload(file):
@@ -85,18 +93,17 @@ class Video(BaseModel):
     # Want this to happen after the request inserts, but then would want to update
     # the thumbnails in the UI...
     # TODO: update UI after video thumb posts
-    ingest_video.apply_async(args=[video.id], countdown=2)
+    ingest_video.apply_async(args=[video.id], countdown=1)
 
     return video
 
   def ingest_source_from_bucket(self):
     storage_client = storage.Client()
-    bucket = storage_client.get_bucket(current_app.config["STATIC_BUCKET"])
+    bucket = storage_client.get_bucket(self.source_url_bucket)
 
     with TemporaryDirectory(prefix="media") as temp_dir:
-      source_name = self.source_url_blob_name
-      source_video_path = os.path.join(temp_dir, source_name)
-      blob = bucket.blob(current_app.config["BUCKET_SOURCE_PREFIX"] + source_name)
+      source_video_path = os.path.join(temp_dir, self.source_url_file_name)
+      blob = bucket.blob(self.source_url_blob_name)
 
       blob.download_to_filename(source_video_path)
 
